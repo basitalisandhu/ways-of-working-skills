@@ -38,7 +38,7 @@ jobs:
           python -m venv /tmp/wheel-check
           /tmp/wheel-check/bin/pip install dist/*.whl
           /tmp/wheel-check/bin/ways-of-working --help
-          for s in change-request meeting-ledger exception-register rfc-lint decision-log weekly-status one-on-one focus-plan risk-refresh; do /tmp/wheel-check/bin/ways-of-working "$s" --help > /dev/null; done
+          for s in change-request meeting-ledger exception-register rfc-lint decision-log weekly-status one-on-one focus-plan risk-refresh vendor-scorecard working-agreement shift-handover; do /tmp/wheel-check/bin/ways-of-working "$s" --help > /dev/null; done
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist

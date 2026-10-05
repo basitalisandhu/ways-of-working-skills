@@ -1,20 +1,20 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "ways-of-working-skills",
-  "description": "Nine Claude Code skills for the records a team keeps, from files you already have: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger and focus time from a calendar export.",
+  "description": "Twelve Claude Code skills for the records a team keeps, from files you already have: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger, focus time from a calendar export, a vendor scorecard, a working agreement check and a shift handover note.",
   "owner": {
     "name": "Muhammad Basit Ali",
     "url": "https://github.com/basitalisandhu"
   },
   "metadata": {
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "ways-of-working",
       "source": "./plugins/ways-of-working",
-      "description": "Nine ways-of-working skills, each with a tested standard-library script over local files: change-request-writer, meeting-actions-ledger, risk-exception-register, risk-register-refresh, rfc-lifecycle, decision-log, weekly-status-rollup, one-on-one-ledger and focus-plan. No network, no rating of people.",
-      "version": "0.1.0",
+      "description": "Twelve ways-of-working skills, each with a tested standard-library script over local files: change-request-writer, meeting-actions-ledger, risk-exception-register, risk-register-refresh, rfc-lifecycle, decision-log, weekly-status-rollup, one-on-one-ledger, focus-plan, vendor-scorecard, working-agreement-check and shift-handover. No network, no rating of people.",
+      "version": "0.2.0",
       "author": {
         "name": "Muhammad Basit Ali",
         "url": "https://github.com/basitalisandhu"
@@ -36,7 +36,10 @@
         "weekly-status",
         "one-on-one",
         "focus-time",
-        "risk-register"
+        "risk-register",
+        "vendor-scorecard",
+        "working-agreement",
+        "on-call-handover"
       ],
       "category": "productivity",
       "tags": [

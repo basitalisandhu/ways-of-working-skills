@@ -17,7 +17,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 PROG = "ways-of-working"
 HERE = Path(__file__).resolve().parent
@@ -74,6 +74,21 @@ COMMANDS: dict[str, tuple[str, str, str]] = {
         "risk-register-refresh",
         "risk_register_refresh.py",
         "Quarterly risk register refresh against findings exports and last quarter's snapshot",
+    ),
+    "vendor-scorecard": (
+        "vendor-scorecard",
+        "vendor_scorecard.py",
+        "Weighted vendor or tool scorecard from a CSV, with a one-step weight sensitivity check",
+    ),
+    "working-agreement": (
+        "working-agreement-check",
+        "working_agreement_check.py",
+        "Check a written working agreement against branch protection, rulesets, CODEOWNERS and workflow exports",
+    ),
+    "shift-handover": (
+        "shift-handover",
+        "shift_handover.py",
+        "On-call or shift handover note from incident and alert exports: open by age, stale, noisy, silenced",
     ),
 }
 

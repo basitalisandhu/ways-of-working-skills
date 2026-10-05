@@ -1,8 +1,8 @@
 # Claude Code skills for ways of working: the records a team keeps, from files you already have
 
-**Nine skills: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger and focus time from a calendar export. Offline, standard-library scripts, tested.**
+**Twelve skills: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger, focus time from a calendar export, a vendor scorecard, a working agreement check and a shift handover note. Offline, standard-library scripts, tested.**
 
-ways-of-working-skills is a Claude Code plugin for the records that keep a team honest about its own process: what a change will do before the board approves it, which actions from last month's meetings are still open, which security exceptions have expired and which risks need a fresh look, which design proposals are stuck in review, which operational decisions are due for a second look, what a lead shipped this week, what each side promised in 1:1s, and where the focus time went. These records usually live in files nobody re-reads. Each skill here reads those files with a small Python script, applies stated rules, cites the file and line behind every finding, and leaves decisions to people.
+ways-of-working-skills is a Claude Code plugin for the records that keep a team honest about its own process: what a change will do before the board approves it, which actions from last month's meetings are still open, which security exceptions have expired and which risks need a fresh look, which design proposals are stuck in review, which operational decisions are due for a second look, what a lead shipped this week, what each side promised in 1:1s, where the focus time went, whether a vendor choice survives a change of weights, whether the repository settings match the team's working agreement, and what the next on-call shift needs to know. These records usually live in files nobody re-reads. Each skill here reads those files with a small Python script, applies stated rules, cites the file and line behind every finding, and leaves decisions to people.
 
 ```text
 /plugin marketplace add basitalisandhu/ways-of-working-skills
@@ -31,6 +31,9 @@ This pack is part of [claude-skills](https://github.com/basitalisandhu/claude-sk
 - A 1:1 is coming up and you want the open commitments on both sides and the days since the last one, kept private. `one-on-one-ledger`
 - The week feels full of meetings and you want the real load, the back-to-back runs and the longest free blocks from a calendar export. `focus-plan`
 - The quarterly risk review is due and the register has to be compared with this quarter's findings and last quarter's snapshot. `risk-register-refresh`
+- A tool or supplier selection is close, and you want the weighted scores and whether the winner changes when one weight moves. `vendor-scorecard`
+- The team wrote down "PRs need one review" and "main is protected", and you want to know whether the repository settings still say the same. `working-agreement-check`
+- An on-call shift is ending and the next person needs what is open, what has gone quiet, which alerts are noisy and which silences end soon. `shift-handover`
 
 ## Skills
 
@@ -45,6 +48,9 @@ This pack is part of [claude-skills](https://github.com/basitalisandhu/claude-sk
 | `one-on-one-ledger` | "prep my 1:1 with Sam", "who am I overdue a 1:1 with?", "what did I promise in my 1:1s?" | `one_on_one_ledger.py` | a private local folder of notes: one file per person with `## YYYY-MM-DD` sections, or dated files with `## <name>` sections | one ledger per person: days since the last 1:1 against the cadence, earlier gaps, open commitments on each side with overdue days, topics raised more than once; no ratings, rankings or comparisons; refuses paths inside a repository or containing "shared" |
 | `weekly-status-rollup` | "write my weekly status", "what did I ship this week?", "what keeps carrying over?", "standup update" | `weekly_status_rollup.py` | `git log` text per repository, `gh pr list --json` and `gh issue list --json` exports, last week's note | a status note with shipped, in review, in progress, blocked and carried-over items (weeks carried counted from last week's note), Decisions needed and Risks left to fill; `--daily` for a standup-sized note |
 | `risk-register-refresh` | "prepare the quarterly risk review", "which findings are not in the register?", "which risks are overdue for review?" | `risk_register_refresh.py` | a register CSV, last quarter's snapshot, and findings as Security Hub ASFF JSON, JSON or CSV | new findings with no register entry, risks with no supporting finding, likelihood or impact changes as written, overdue or missing review dates, risks without an owner, and a refresh agenda; no scoring |
+| `vendor-scorecard` | "score these vendors against our criteria", "does the result change if we weight cost more?" | `vendor_scorecard.py` | a CSV: criterion, weight, one column per vendor with scores 1 to 5 | weighted scores and ranking, a sensitivity table for each weight moved one step up and down, ties for first and leader changes flagged, a Markdown scorecard with a blank decision line |
+| `working-agreement-check` | "does our repo enforce our working agreement?", "are we still in line after the protection change?" | `working_agreement_check.py` | the agreement in Markdown, plus saved `gh api` branch protection and rulesets JSON, CODEOWNERS and a workflow list | each recognised rule as met, not met or not checkable from these exports, with the setting behind it, and the rules it does not recognise |
+| `shift-handover` | "write the on-call handover", "which incidents have gone quiet?", "which silences expire tonight?" | `shift_handover.py` | an incident export (JSON or CSV), an optional alert export and notes | open incidents grouped by age, no update in N hours, no owner, noisy alerts, silences that end during the next shift, and a handover note with blank acknowledgement lines |
 
 Every script reads local files only, prints Markdown by default and JSON with `--json`, answers `--help`, and writes only to the path given with `--out`, `--output` or `--index`. Exit codes are the same across the pack: 0 nothing flagged, 1 something needs a person, 2 bad input; `one-on-one-ledger` adds 3 when it refuses a path that looks shared or sits inside a repository. Where a date matters it is judged against `--as-of` (`focus-plan` takes `--start`), so a run can be repeated later with the same result.
 
@@ -55,6 +61,12 @@ Every script reads local files only, prints Markdown by default and JSON with `-
 **weekly-status-rollup.** `weekly-status-rollup` does the bookkeeping part of a lead's weekly note from saved `git log` text and `gh pr list` and `gh issue list` exports across one or more repositories: shipped, in review, in progress, blocked, and carried over, with the number of weeks each item has carried counted from last week's note. Commits that reference a shipped PR are folded into it. "Decisions needed" and "Risks" stay as sections for the author to fill; entries from last week are copied as questions, never invented. `--daily` gives a standup-sized version. It is one lead's narrative note; team sprint metrics belong to `iteration-report` and the review queue to `pr-queue-digest`.
 
 **risk-register-refresh.** `risk-register-refresh` prepares the quarterly review of a risk register kept as CSV. It compares the register with this quarter's findings (Security Hub ASFF JSON, generic JSON or CSV saved to disk) and with last quarter's snapshot, and reports findings that no risk covers, risks whose linked findings have gone, likelihood or impact values that changed, overdue or unreadable review dates, and risks without an owner, then renders the agenda for the meeting. Likelihood and impact are shown exactly as the register states them; the script never scores, rates or ranks risk, and it does not connect to any GRC tool.
+
+**vendor-scorecard.** A selection scorecard can name a winner by a fraction of a point. `vendor-scorecard` reads the CSV the team filled in (criterion, weight, a 1 to 5 score per vendor), computes the weighted scores with exact arithmetic so ties are real, and then moves each weight one step up and one step down to show whether the leader and the full order survive. Ties for first and any single move that changes the leader are flagged. It does not choose criteria, set weights, negotiate price or read security questionnaires; the decision line stays blank.
+
+**working-agreement-check.** `working-agreement-check` reads a team's working agreement as written, one rule per list item, and matches the rules it recognises (review counts, code owner review, protected branch, required checks, force pushes, deletion, linear history, signed commits, admin enforcement, stale reviews, conversation resolution, CODEOWNERS coverage of a path) to saved `gh api` exports of branch protection and rulesets, the CODEOWNERS file and the workflow list. Each rule comes back as met, not met or not checkable from these exports, with the setting that decided it; rules it does not recognise are listed for a person to check. It changes nothing and has no audit framing.
+
+**shift-handover.** `shift-handover` writes the note one on-call shift leaves for the next from saved incident and alert exports and the outgoing person's notes: open incidents grouped by age, those with no update for more than N hours or no owner, alerts that fired more than a threshold, and silences that end during the next shift or have already ended. It looks forward, at what is live; the retrospective timeline is `incident-postmortem-timeline`. It never pages, assigns, closes or silences anything.
 
 ## What this is not
 
@@ -68,6 +80,9 @@ Every script reads local files only, prints Markdown by default and JSON with `-
 - `change-request-writer` comes after `terraform-review` (claude-dev-skills) has reviewed the code, and before `github-change-control-evidence` (compliance-evidence-skills) evidences the change for an audit.
 - `rfc-lifecycle` covers the proposal and its review; `adr-writer` (claude-dev-skills) writes the architecture decision record once an RFC is accepted; `adr-miner` (repo-engineering-skills) recovers old decisions from git history; `decision-log` is for everyday operational decisions that need neither.
 - `weekly-status-rollup` is one lead's note; `iteration-report` (github-manager-skills) gives team sprint metrics and `pr-queue-digest` the review queue.
+- `vendor-scorecard` ranks vendors on agreed criteria; supplier assurance evidence and questionnaires belong to compliance-evidence-skills.
+- `working-agreement-check` checks the team's own rules against repository settings; `github-change-control-evidence` (compliance-evidence-skills) produces audit evidence and `docs-truth-check` (repo-engineering-skills) checks README claims against code.
+- `shift-handover` is the live hand-off between on-call shifts; `incident-postmortem-timeline` (github-manager-skills) is the retrospective after an incident.
 - `risk-register-refresh` compares quarters of a risk register; `risk-exception-register` tracks accepted exceptions with an expiry; `access-review-pack` (m365-governance-skills) is for access recertification and `security-hub-triage` (aws-security-skills) for a live findings backlog.
 
 ## Install
@@ -77,7 +92,7 @@ The plugin installs as shown at the top. The scripts are also available without 
 - **Container image** (GitHub Packages, linux/amd64 and linux/arm64), entrypoint `ways-of-working <subcommand> [args]`; mount the input folder at `/work`. The image is published when a version tag is pushed, signed with cosign (keyless), with a build provenance attestation and an SPDX SBOM attached to the GitHub Release:
 
   ```bash
-  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.1.0 meeting-ledger /work/notes --as-of 2026-10-05
+  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.2.0 meeting-ledger /work/notes --as-of 2026-10-05
   ```
 
 - **Python package** `ways-of-working-skills`, which installs the same `ways-of-working` command. PyPI publishing is set up in `release.yml` but switched off until the trusted publisher is configured, so until then install from a clone: `pip install .`
@@ -93,6 +108,9 @@ The plugin installs as shown at the top. The scripts are also available without 
 | `one-on-one` | `one_on_one_ledger.py` (one-on-one-ledger) |
 | `focus-plan` | `focus_plan.py` (focus-plan) |
 | `risk-refresh` | `risk_register_refresh.py` (risk-register-refresh) |
+| `vendor-scorecard` | `vendor_scorecard.py` (vendor-scorecard) |
+| `working-agreement` | `working_agreement_check.py` (working-agreement-check) |
+| `shift-handover` | `shift_handover.py` (shift-handover) |
 
 From a checkout, `python3 scripts/cli.py` is the same dispatcher.
 
@@ -148,6 +166,9 @@ No. Names appear where the files name them, sorted alphabetically, and are never
 
 **Does focus-plan change my calendar?**
 No. It reads a saved .ics export and never writes to a calendar or declines meetings. Recurrence rules it does not expand are listed rather than guessed.
+
+**Does working-agreement-check change branch protection?**
+No. It reads exports you saved with `gh api` and reports met, not met or not checkable. Whether to change the setting or the agreement is the team's call.
 
 **Can I run it on a schedule?**
 Yes, without Claude Code: run a subcommand with `--as-of` and act on the exit code, which is 1 when something needs a person.
