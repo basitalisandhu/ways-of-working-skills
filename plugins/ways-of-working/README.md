@@ -2,6 +2,8 @@
 
 Ways-of-working skills that compute from files you already have, each with a tested standard-library Python script. Install with `/plugin marketplace add basitalisandhu/ways-of-working-skills` and then `/plugin install ways-of-working@ways-of-working-skills`. Skills appear as `/ways-of-working:<skill>`, and Claude also invokes them on its own when a request matches a skill's description.
 
+Find this when you search for: "meeting overload", "action items", "weekly update".
+
 | Skill | Script | Use it to |
 |---|---|---|
 | `change-request-writer` | `skills/change-request-writer/scripts/change_request.py` | draft a CAB-style change record from a Terraform plan JSON or a `gh pr view` export, with add, change, destroy and replace counts and IAM, security group, KMS, S3 policy and network changes flagged for a reviewer |

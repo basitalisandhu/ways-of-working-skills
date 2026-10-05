@@ -5,10 +5,11 @@ Checks:
   * every JSON file parses; marketplace.json has name, owner.name and plugins[]; each plugin source exists and its
     plugin.json name and version match the marketplace entry
   * every skills/<name>/SKILL.md has frontmatter with name (equal to the directory name, lowercase with hyphens, at
-    most 64 chars), a description wrapped in double quotes (at most 1024 chars, starting with a capitalised word and
-    saying "Use when" and "Not"), license MIT, compatibility and metadata; scalars parse under strict YAML rules; the
-    body is under 500 lines, contains the untrusted-data line and the sections When to use it, Inputs, Steps, Script,
-    Output, Limits and Related skills; relative links outside code blocks resolve
+    most 64 chars), a description that is one double-quoted line (at most 1024 chars by the spec and 600 by house rule,
+    starting with a capitalised word and saying "Use when", "Use " and "Not for"), license MIT, compatibility and
+    metadata; scalars parse under strict YAML rules; the body is under 500 lines, contains the untrusted-data line
+    and the sections When to use it, Inputs, Steps, Script, Output, Limits and Related skills; relative links outside
+    code blocks resolve
   * every script referenced as ${CLAUDE_PLUGIN_ROOT}/skills/<skill>/scripts/<file> exists and is executable; every
     scripts/*.py not starting with "_" has a python3 shebang, a --json option and a main guard, answers --help with
     exit 0, is named in its SKILL.md, has a test file tests/test_<stem>.py, and imports no network or subprocess module
@@ -156,6 +157,41 @@ def scalar_problems(text: str) -> list[str]:
     return problems
 
 
+DESCRIPTION_MAX = 600
+
+
+def description_problems(text: str) -> list[str]:
+    """House rules for a SKILL.md description: one double-quoted line of at most 600 characters with a "Use ..."
+    sentence and a "Not for" boundary. Returns one message per broken rule (empty when there is no frontmatter)."""
+    if not text.startswith("---\n"):
+        return []
+    end = text.find("\n---", 4)
+    if end < 0:
+        return []
+    lines = [line for line in text[4:end].splitlines() if line.startswith("description:")]
+    if not lines:
+        return ["no description"]
+    raw = lines[0][len("description:") :].strip()
+    if len(raw) < 2 or raw[0] != '"' or raw[-1] != '"':
+        return ["description must be a single double-quoted line"]
+    try:
+        desc = json.loads(raw)
+    except json.JSONDecodeError:
+        return ["description is not a valid double-quoted string"]
+    problems = []
+    if len(desc) > DESCRIPTION_MAX:
+        problems.append(f"description is {len(desc)} chars (house limit {DESCRIPTION_MAX})")
+    if "Use " not in desc:
+        problems.append('description has no "Use ..." sentence')
+    if "Not for" not in desc:
+        problems.append('description has no "Not for" boundary')
+    return problems
+
+
+def has_limits_section(text: str) -> bool:
+    return re.search(r"^## Limits[ \t]*$", text, re.MULTILINE) is not None
+
+
 def json_files() -> dict[Path, object]:
     parsed: dict[Path, object] = {}
     for p in sorted(ROOT.rglob("*.json")):
@@ -202,8 +238,10 @@ def check_skill(plugin_root: Path, skill_dir: Path) -> str | None:
         err(f"{rel(skill_dir)}: no SKILL.md")
         return None
     body = skill.read_text(encoding="utf-8")
-    for problem in scalar_problems(body):
+    for problem in scalar_problems(body) + description_problems(body):
         err(f"{rel(skill)}: {problem}")
+    if not has_limits_section(body):
+        err(f"{rel(skill)}: missing section '## Limits'")
     fm = frontmatter(body)
     if fm is None:
         err(f"{rel(skill)}: no frontmatter")
@@ -229,7 +267,7 @@ def check_skill(plugin_root: Path, skill_dir: Path) -> str | None:
         err(f"{rel(skill)}: over 500 lines")
     if UNTRUSTED_LINE not in body:
         err(f"{rel(skill)}: missing the line {UNTRUSTED_LINE!r}")
-    for heading in SECTIONS:
+    for heading in (s for s in SECTIONS if s != "## Limits"):  # Limits has its own check above
         if not re.search(rf"^{re.escape(heading)}$", body, re.MULTILINE):
             err(f"{rel(skill)}: missing section {heading!r}")
     for link in re.findall(r"\]\(([^)#]+)\)", FENCE_RE.sub("", body)):
@@ -259,7 +297,12 @@ def check_skill(plugin_root: Path, skill_dir: Path) -> str | None:
         if f"scripts/{script.name}" not in body:
             err(f"{rel(skill)}: does not mention scripts/{script.name}")
         proc = subprocess.run(
-            [sys.executable, str(script), "--help"], capture_output=True, text=True, timeout=30, check=False
+            [sys.executable, str(script), "--help"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=30,
+            check=False,
         )
         if proc.returncode != 0 or "usage:" not in proc.stdout:
             err(f"{rel(script)}: --help did not exit 0 with usage text")

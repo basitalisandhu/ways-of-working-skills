@@ -100,7 +100,7 @@ def test_missing_fields_bad_values_and_malformed_front_matter(tmp_path):
 
 def test_empty_and_bad_inputs_exit_2(tmp_path):
     (tmp_path / "empty").mkdir()
-    (tmp_path / "empty" / "README.md").write_text("# Decisions\n")
+    (tmp_path / "empty" / "README.md").write_text("# Decisions\n", encoding="utf-8")
     rc, _, err = run_main(mod, [str(tmp_path / "empty")])
     assert rc == 2 and "no decision files" in err
     rc, _, err = run_main(mod, [str(tmp_path / "missing")])
@@ -114,8 +114,8 @@ def test_index_writes_only_the_named_file(tmp_path):
     index = tmp_path / "decisions" / "INDEX.md"
     rc, out, _ = run_main(mod, [folder, *AS_OF, "--index", str(index)])
     assert rc == 0
-    assert index.read_text().startswith("# Decision log\n")
-    assert "| [A](a.md) | Use one on-call rota | active |" in index.read_text()
+    assert index.read_text(encoding="utf-8").startswith("# Decision log\n")
+    assert "| [A](a.md) | Use one on-call rota | active |" in index.read_text(encoding="utf-8")
     assert sorted(p.name for p in (tmp_path / "decisions").iterdir()) == ["INDEX.md", "a.md"]
     rc, _, _ = run_main(mod, [folder, *AS_OF])  # INDEX.md is skipped on the next run
     assert rc == 0

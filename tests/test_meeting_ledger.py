@@ -118,7 +118,7 @@ def test_out_writes_exactly_ledger_md_and_ledger_json(tmp_path):
     rc, stdout, _ = run_main(mod, [folder, *AS_OF, "--out", str(out)])
     assert rc == 1 and "wrote" in stdout
     assert sorted(p.name for p in out.iterdir()) == ["ledger.json", "ledger.md"]
-    assert json.loads((out / "ledger.json").read_text())["as_of"] == "2026-10-05"
+    assert json.loads((out / "ledger.json").read_text(encoding="utf-8"))["as_of"] == "2026-10-05"
     assert sorted(p.name for p in (tmp_path / "notes").iterdir()) == sorted(NOTES)
 
 

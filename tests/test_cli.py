@@ -15,7 +15,9 @@ CLI = ROOT / "scripts" / "cli.py"
 
 
 def run(*args: str, cwd: Path = ROOT) -> subprocess.CompletedProcess:
-    return subprocess.run([sys.executable, str(CLI), *args], capture_output=True, text=True, timeout=60, cwd=cwd)
+    return subprocess.run(
+        [sys.executable, str(CLI), *args], capture_output=True, text=True, encoding="utf-8", timeout=60, cwd=cwd
+    )
 
 
 def load_cli():
@@ -72,7 +74,7 @@ def test_exit_code_and_arguments_pass_through(tmp_path):
     assert "usage: " in result.stderr
     notes = tmp_path / "notes"
     notes.mkdir()
-    (notes / "2026-09-01-sync.md").write_text("- [ ] Ops: renew the certificate (due 2026-09-30)\n")
+    (notes / "2026-09-01-sync.md").write_text("- [ ] Ops: renew the certificate (due 2026-09-30)\n", encoding="utf-8")
     result = run("meeting-ledger", str(notes), "--as-of", "2026-10-05", "--json")
     assert result.returncode == 1
     assert json.loads(result.stdout)["actions"][0]["flags"] == ["overdue"]
@@ -81,8 +83,10 @@ def test_exit_code_and_arguments_pass_through(tmp_path):
 def test_version_matches_every_version_field():
     text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     expected = re.search(r'^version = "([^"]+)"', text, re.MULTILINE).group(1)
-    plugin = json.loads((ROOT / "plugins" / "ways-of-working" / ".claude-plugin" / "plugin.json").read_text())
-    market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+    plugin = json.loads(
+        (ROOT / "plugins" / "ways-of-working" / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
+    market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
     assert plugin["version"] == expected
     assert market["metadata"]["version"] == expected
     assert all(p["version"] == expected for p in market["plugins"])
@@ -113,6 +117,7 @@ def test_package_layout_finds_skills_next_to_the_module(tmp_path):
         [sys.executable, str(pkg / "cli.py"), "decision-log", "--help"],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=60,
         cwd=tmp_path,
     )
