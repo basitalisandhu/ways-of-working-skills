@@ -1,4 +1,5 @@
 """Tests for decision_log.py. Each test writes a synthetic decisions folder into tmp_path."""
+
 from __future__ import annotations
 
 from conftest import load_script, run_json, run_main, write_files
@@ -9,8 +10,13 @@ BODY = "\n## Context\nLogs grew. Nobody reads old ones.\n\n## Decision\nKeep 30 
 
 
 def decision(**fields: str) -> str:
-    base = {"title": "T", "status": "active", "decided-by": "platform leads", "date": "2026-01-01",
-            "review-date": "2027-01-01"}
+    base = {
+        "title": "T",
+        "status": "active",
+        "decided-by": "platform leads",
+        "date": "2026-01-01",
+        "review-date": "2027-01-01",
+    }
     base.update({k.replace("_", "-"): v for k, v in fields.items()})
     return "---\n" + "".join(f"{k}: {v}\n" for k, v in base.items()) + "---\n" + BODY
 
@@ -26,8 +32,9 @@ def rules(rep: dict) -> set[tuple[str, str]]:
 def test_lists_decisions_sorted_by_id_and_clean_log_exits_0(tmp_path):
     files = {
         "0012-logs.md": decision(id="D-0012", title="Keep build logs for 30 days", supersedes="D-0004"),
-        "0004-logs.md": decision(id="D-0004", title="Keep build logs for a year", status="superseded",
-                                 superseded_by="D-0012"),
+        "0004-logs.md": decision(
+            id="D-0004", title="Keep build logs for a year", status="superseded", superseded_by="D-0012"
+        ),
     }
     rc, rep = run_json(mod, [log(tmp_path, files), *AS_OF])
     assert rc == 0 and rep["findings"] == []
@@ -79,9 +86,14 @@ def test_missing_fields_bad_values_and_malformed_front_matter(tmp_path):
     }
     _, rep = run_json(mod, [log(tmp_path, files), *AS_OF])
     got = rules(rep)
-    assert {("0001-x", "missing-field"), ("0001-x", "invalid-date"), ("0001-x", "missing-section"),
-            ("0001-x", "duplicate-id"), ("0001-x", "invalid-status"),
-            ("0003-z", "malformed-front-matter")} <= got
+    assert {
+        ("0001-x", "missing-field"),
+        ("0001-x", "invalid-date"),
+        ("0001-x", "missing-section"),
+        ("0001-x", "duplicate-id"),
+        ("0001-x", "invalid-status"),
+        ("0003-z", "malformed-front-matter"),
+    } <= got
     missing = sorted(f["detail"] for f in rep["findings"] if f["rule"] == "missing-field" and f["file"] == "0001-x.md")
     assert missing == ["decided-by is empty or absent", "review-date is empty or absent", "status is empty or absent"]
 
@@ -129,10 +141,12 @@ As of 2026-10-05: 2 decision(s), 1 finding(s).
 
 def test_golden_report(tmp_path):
     files = {
-        "0012-logs.md": decision(id="D-0012", title="Keep build logs for 30 days", supersedes="D-0004",
-                                 review_date="2026-09-14"),
-        "0004-logs.md": decision(id="D-0004", title="Keep build logs for a year", status="superseded",
-                                 superseded_by="D-0012"),
+        "0012-logs.md": decision(
+            id="D-0012", title="Keep build logs for 30 days", supersedes="D-0004", review_date="2026-09-14"
+        ),
+        "0004-logs.md": decision(
+            id="D-0004", title="Keep build logs for a year", status="superseded", superseded_by="D-0012"
+        ),
     }
     rc, out, _ = run_main(mod, [log(tmp_path, files), *AS_OF])
     assert rc == 1

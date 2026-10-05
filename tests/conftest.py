@@ -5,6 +5,7 @@ not a package. Tests load one by path with load_script() and call its main(argv)
 There are no fixture files on disk: each test builds its synthetic input in pytest's tmp_path with write_files(),
 using made-up team names and example values only. Nothing here touches the network.
 """
+
 from __future__ import annotations
 
 import importlib.util

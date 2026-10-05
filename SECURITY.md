@@ -1,6 +1,6 @@
 # Security policy
 
-This repository ships skills and scripts that run inside people's Claude Code sessions over their own files: Terraform plans, meeting notes, exception registers, RFCs and decision records. The skill scripts read the file or folder you point them at and print a report or write it to the path you name; nothing here makes a network call, stores a credential or reports usage anywhere.
+This repository ships skills and scripts that run inside people's Claude Code sessions over their own files: Terraform plans, meeting notes, exception and risk registers, findings exports, RFCs, decision records, git and gh exports, private 1:1 notes and calendar exports. The skill scripts read the file or folder you point them at and print a report or write it to the path you name; nothing here makes a network call, stores a credential or reports usage anywhere.
 
 ## Supported versions
 
@@ -17,7 +17,7 @@ Include what you found, how to reproduce it, and what you think the impact is. Y
 
 ## What counts
 
-- A skill script that opens a network connection, starts a subprocess, or writes anywhere other than the `--out` or `--index` path it was given.
+- A skill script that opens a network connection, starts a subprocess, or writes anywhere other than the `--out`, `--output` or `--index` path it was given.
 - A way for the content of an input file (a plan, a note, a register row) to change what a script computes beyond its documented rules, or to make a script read files outside the input it was given.
 - Text in any file of this repository that addresses the model rather than the reader.
 - A committed file holding real names, real infrastructure details or a secret-shaped string.

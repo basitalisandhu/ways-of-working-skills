@@ -1,4 +1,5 @@
 """Tests for rfc_lint.py. Each test writes a synthetic RFC folder into tmp_path."""
+
 from __future__ import annotations
 
 import textwrap

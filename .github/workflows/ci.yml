@@ -64,7 +64,7 @@ jobs:
         run: |
           docker build --build-arg VERSION=ci -t ways-of-working-skills:ci .
           docker run --rm ways-of-working-skills:ci --help > help.txt && grep "^usage: ways-of-working <subcommand>" help.txt
-          for s in change-request meeting-ledger exception-register rfc-lint decision-log; do docker run --rm ways-of-working-skills:ci "$s" --help > /dev/null; done
+          for s in change-request meeting-ledger exception-register rfc-lint decision-log weekly-status one-on-one focus-plan risk-refresh; do docker run --rm ways-of-working-skills:ci "$s" --help > /dev/null; done
           mkdir -p sample && printf -- '- [ ] Platform team: update the restore runbook (due 2026-10-01)\n' > sample/2026-09-22-sync.md
           set +e
           docker run --rm -v "$PWD/sample:/work:ro" ways-of-working-skills:ci meeting-ledger /work --as-of 2026-10-05 > ledger.md; test $? -eq 1 || exit 1

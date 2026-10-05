@@ -27,6 +27,7 @@ output is deterministic for the same file and --as-of.
 Exit codes: 0 no findings, 1 at least one finding, 2 bad input (file missing or empty, no table, missing required
 columns, bad --as-of).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -86,8 +87,12 @@ def read_rows(path: Path) -> tuple[list[str], list[tuple[int, list[str]]]]:
         if not line.strip().startswith("|"):
             continue
         header = [key(c) for c in split_md_row(line)]
-        if "id" in header and "expires" in header and i + 1 < len(lines) and re.fullmatch(
-                r"\s*\|?[\s:|-]+\|?\s*", lines[i + 1]):
+        if (
+            "id" in header
+            and "expires" in header
+            and i + 1 < len(lines)
+            and re.fullmatch(r"\s*\|?[\s:|-]+\|?\s*", lines[i + 1])
+        ):
             rows = []
             for n in range(i + 2, len(lines)):
                 if not lines[n].strip().startswith("|"):
@@ -104,8 +109,9 @@ def parse_date(value: str) -> dt.date | None:
         return None
 
 
-def analyse(header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date, window: int,
-            renewal_limit: int) -> dict:
+def analyse(
+    header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date, window: int, renewal_limit: int
+) -> dict:
     missing = [c for c in REQUIRED if c not in header]
     if missing:
         raise InputError("missing required column(s): " + ", ".join(missing))
@@ -117,8 +123,12 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date
 
     for line, cells in rows:
         if len(cells) != len(header):
-            add("malformed-row", {"id": cells[0]} if cells and cells[0] else None, line,
-                f"expected {len(header)} cells, found {len(cells)}")
+            add(
+                "malformed-row",
+                {"id": cells[0]} if cells and cells[0] else None,
+                line,
+                f"expected {len(header)} cells, found {len(cells)}",
+            )
             continue
         rec = {c: cells[header.index(c)] if c in header else "" for c in REQUIRED + OPTIONAL}
         rec["line"] = line
@@ -135,8 +145,12 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date
         for field in ("granted", "expires"):
             rec[field + "_date"] = parse_date(rec[field])
             if rec[field + "_date"] is None:
-                add("invalid-date", rec, rec["line"], f"{field} {rec[field]!r} is not a YYYY-MM-DD date"
-                    if rec[field] else f"{field} is empty")
+                add(
+                    "invalid-date",
+                    rec,
+                    rec["line"],
+                    f"{field} {rec[field]!r} is not a YYYY-MM-DD date" if rec[field] else f"{field} is empty",
+                )
 
     # Group rows into exceptions: renewal_of chains first, then system and control for unlinked rows.
     by_id = {r["id"]: r for r in records}
@@ -167,9 +181,13 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date
         renewed.update(m["id"] for m in members[:-1])
         if len(members) - 1 > renewal_limit:
             last = members[-1]
-            add("repeated-renewal", last, last["line"],
+            add(
+                "repeated-renewal",
+                last,
+                last["line"],
                 f"granted {len(members)} times ({', '.join(m['id'] for m in members)}) for "
-                f"{last['system']} / {last['control']}")
+                f"{last['system']} / {last['control']}",
+            )
 
     for r in records:
         active = r["status"].strip().lower() != "closed" and r["id"] not in renewed
@@ -185,9 +203,14 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date
         if not r["approver"]:
             add("missing-approver", r, r["line"], "approver is empty")
         if r["compensating_controls"].strip().lower() in EMPTY_CONTROL:
-            add("missing-compensating-control", r, r["line"],
-                f"compensating_controls is {r['compensating_controls']!r}" if r["compensating_controls"]
-                else "compensating_controls is empty")
+            add(
+                "missing-compensating-control",
+                r,
+                r["line"],
+                f"compensating_controls is {r['compensating_controls']!r}"
+                if r["compensating_controls"]
+                else "compensating_controls is empty",
+            )
         if r["requester"] and r["approver"] and r["requester"].strip().lower() == r["approver"].strip().lower():
             add("approver-is-requester", r, r["line"], "requester and approver are the same")
 
@@ -202,9 +225,19 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date
         "window_days": window,
         "renewal_limit": renewal_limit,
         "rows": len(rows),
-        "exceptions": [{"id": r["id"], "system": r["system"], "control": r["control"], "expires": r["expires"],
-                        "status": "closed" if r["status"].strip().lower() == "closed"
-                        else ("renewed" if r["id"] in renewed else "open"), "line": r["line"]} for r in records],
+        "exceptions": [
+            {
+                "id": r["id"],
+                "system": r["system"],
+                "control": r["control"],
+                "expires": r["expires"],
+                "status": "closed"
+                if r["status"].strip().lower() == "closed"
+                else ("renewed" if r["id"] in renewed else "open"),
+                "line": r["line"],
+            }
+            for r in records
+        ],
         "findings": findings,
     }
 
@@ -212,9 +245,11 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date
 def render(rep: dict, source: str) -> str:
     out = [f"# Exception review agenda: {source}", ""]
     open_n = sum(1 for e in rep["exceptions"] if e["status"] == "open")
-    out.append(f"As of {rep['as_of']}. {rep['rows']} row(s), {open_n} open exception(s), {len(rep['findings'])} "
-               f"finding(s). Expiring means within {rep['window_days']} days; renewals above {rep['renewal_limit']} "
-               "are flagged.")
+    out.append(
+        f"As of {rep['as_of']}. {rep['rows']} row(s), {open_n} open exception(s), {len(rep['findings'])} "
+        f"finding(s). Expiring means within {rep['window_days']} days; renewals above {rep['renewal_limit']} "
+        "are flagged."
+    )
     out.append("")
     n = 0
     for section, heading in SECTIONS:
@@ -241,14 +276,18 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="exception_register.py",
         description="Lint a register of security exceptions and risk acceptances (CSV or Markdown table) and print "
-                    "a review agenda.",
+        "a review agenda.",
         epilog="Exit codes: 0 no findings, 1 at least one finding, 2 bad input.",
     )
     p.add_argument("register", help="register file: .csv, or Markdown with a pipe table")
     p.add_argument("--as-of", default=None, help="date to judge expiry against, YYYY-MM-DD (default: today)")
     p.add_argument("--window", type=int, default=30, help="days ahead that count as expiring (default 30)")
-    p.add_argument("--renewal-limit", type=int, default=2,
-                   help="renewals allowed before a row is flagged as renewed repeatedly (default 2)")
+    p.add_argument(
+        "--renewal-limit",
+        type=int,
+        default=2,
+        help="renewals allowed before a row is flagged as renewed repeatedly (default 2)",
+    )
     p.add_argument("--json", action="store_true", help="print the computed data as JSON instead of Markdown")
     p.add_argument("--out", default=None, help="write the output to this file instead of standard output")
     return p

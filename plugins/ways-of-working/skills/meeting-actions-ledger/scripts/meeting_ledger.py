@@ -31,6 +31,7 @@ The output is deterministic for the same files and --as-of.
 Exit codes: 0 nothing flagged, 1 at least one overdue, ownerless or carried item or a line not understood, 2 bad
 input (folder missing, no notes files, bad --as-of).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -97,7 +98,7 @@ def parse_action(raw: str) -> tuple[dict | None, str | None]:
         due = parse_date(dm.group("date"))
         if due is None:
             return None, f"due date {dm.group('date')!r} is not a valid YYYY-MM-DD date"
-        text = (text[: dm.start()] + text[dm.end():]).strip()
+        text = (text[: dm.start()] + text[dm.end() :]).strip()
     owner = None
     om = OWNER_AT_RE.match(text) or OWNER_COLON_RE.match(text)
     if om and len(om.group("owner").split()) <= 3:
@@ -111,8 +112,14 @@ def parse_action(raw: str) -> tuple[dict | None, str | None]:
 def collect(folder: Path) -> tuple[list[dict], list[dict], list[dict]]:
     if not folder.is_dir():
         raise InputError(f"{folder}: not a folder")
-    files = sorted(p for p in folder.rglob("*") if p.is_file() and p.suffix.lower() in (".md", ".txt")
-                   and p.name.lower() not in ("readme.md", "ledger.md") and not p.name.startswith("_"))
+    files = sorted(
+        p
+        for p in folder.rglob("*")
+        if p.is_file()
+        and p.suffix.lower() in (".md", ".txt")
+        and p.name.lower() not in ("readme.md", "ledger.md")
+        and not p.name.startswith("_")
+    )
     if not files:
         raise InputError(f"{folder}: no meeting notes (*.md or *.txt) found")
     meetings, appearances, bad = [], [], []
@@ -127,8 +134,10 @@ def collect(folder: Path) -> tuple[list[dict], list[dict], list[dict]]:
                 bad.append({"file": rel, "line": n, "text": raw.strip(), "problem": problem})
             elif action:
                 appearances.append(action | {"file": rel, "line": n, "date": date})
-    order = {m["file"]: i for i, m in enumerate(sorted(meetings, key=lambda m: (m["date"] is None,
-                                                                             m["date"] or dt.date.min, m["file"])))}
+    order = {
+        m["file"]: i
+        for i, m in enumerate(sorted(meetings, key=lambda m: (m["date"] is None, m["date"] or dt.date.min, m["file"])))
+    }
     for a in appearances:
         a["order"] = order[a["file"]]
     appearances.sort(key=lambda a: (a["order"], a["line"]))
@@ -161,29 +170,36 @@ def build(appearances: list[dict], as_of: dt.date, carry: int) -> list[dict]:
                 flags.append("ownerless")
             if len(item["open_in"]) >= carry:
                 flags.append("carried")
-        ledger.append({
-            "id": f"A{i:03d}",
-            "text": item["text"],
-            "owner": item["owner"],
-            "due": item["due"].isoformat() if item["due"] else None,
-            "status": status,
-            "first_seen": item["seen"][0]["file"],
-            "last_seen": last["file"],
-            "meetings_open": len(item["open_in"]),
-            "sources": [f"{s['file']}:{s['line']}" for s in item["seen"]],
-            "flags": flags,
-        })
+        ledger.append(
+            {
+                "id": f"A{i:03d}",
+                "text": item["text"],
+                "owner": item["owner"],
+                "due": item["due"].isoformat() if item["due"] else None,
+                "status": status,
+                "first_seen": item["seen"][0]["file"],
+                "last_seen": last["file"],
+                "meetings_open": len(item["open_in"]),
+                "sources": [f"{s['file']}:{s['line']}" for s in item["seen"]],
+                "flags": flags,
+            }
+        )
     return ledger
 
 
 def render(ledger: list[dict], meetings: list[dict], bad: list[dict], as_of: dt.date, carry: int) -> str:
     out = ["# Action ledger", ""]
     open_items = [x for x in ledger if x["status"] == "open"]
-    out.append(f"As of {as_of.isoformat()}. {len(meetings)} meeting file(s), {len(ledger)} action(s): "
-               f"{len(open_items)} open, {len(ledger) - len(open_items)} done.")
+    out.append(
+        f"As of {as_of.isoformat()}. {len(meetings)} meeting file(s), {len(ledger)} action(s): "
+        f"{len(open_items)} open, {len(ledger) - len(open_items)} done."
+    )
     out.append("")
-    for flag, heading in (("overdue", "Overdue"), ("ownerless", "No owner stated"),
-                          ("carried", f"Carried over in {carry} or more meetings")):
+    for flag, heading in (
+        ("overdue", "Overdue"),
+        ("ownerless", "No owner stated"),
+        ("carried", f"Carried over in {carry} or more meetings"),
+    ):
         rows = [x for x in ledger if flag in x["flags"]]
         out.append(f"## {heading} ({len(rows)})")
         out.append("")
@@ -212,8 +228,10 @@ def render(ledger: list[dict], meetings: list[dict], bad: list[dict], as_of: dt.
         out.append("| ID | Action | Owner | Due | Status | Meetings open | Flags | Sources |")
         out.append("|---|---|---|---|---|---|---|---|")
         for x in ledger:
-            out.append(f"| {x['id']} | {x['text'].replace('|', '/')} | {x['owner'] or ''} | {x['due'] or ''} | "
-                       f"{x['status']} | {x['meetings_open']} | {', '.join(x['flags'])} | {'; '.join(x['sources'])} |")
+            out.append(
+                f"| {x['id']} | {x['text'].replace('|', '/')} | {x['owner'] or ''} | {x['due'] or ''} | "
+                f"{x['status']} | {x['meetings_open']} | {', '.join(x['flags'])} | {'; '.join(x['sources'])} |"
+            )
     else:
         out.append("No action lines found. See the accepted formats in the skill.")
     out.append("")
@@ -235,7 +253,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="meeting_ledger.py",
         description="Build one action ledger across a folder of meeting notes and flag overdue, ownerless and "
-                    "repeatedly carried items.",
+        "repeatedly carried items.",
         epilog="Exit codes: 0 nothing flagged, 1 something flagged or a line not understood, 2 bad input.",
     )
     p.add_argument("folder", help="folder of meeting notes (*.md, *.txt)")

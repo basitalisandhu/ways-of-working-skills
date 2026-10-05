@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "ways-of-working-skills"
 version = "0.1.0"
-description = "Ways-of-working records computed from files you already have: change records from Terraform plans, an action ledger across meeting notes, an exception register lint, an RFC lifecycle lint and a decision log."
+description = "Ways-of-working records computed from files you already have: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger and focus time from a calendar export."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -22,6 +22,10 @@ keywords = [
   "risk-exceptions",
   "rfc",
   "decision-log",
+  "weekly-status",
+  "one-on-one",
+  "focus-time",
+  "risk-register",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -61,6 +65,10 @@ bypass-selection = true
 "plugins/ways-of-working/skills/risk-exception-register/scripts" = "ways_of_working_skills/skills/risk-exception-register/scripts"
 "plugins/ways-of-working/skills/rfc-lifecycle/scripts" = "ways_of_working_skills/skills/rfc-lifecycle/scripts"
 "plugins/ways-of-working/skills/decision-log/scripts" = "ways_of_working_skills/skills/decision-log/scripts"
+"plugins/ways-of-working/skills/weekly-status-rollup/scripts" = "ways_of_working_skills/skills/weekly-status-rollup/scripts"
+"plugins/ways-of-working/skills/one-on-one-ledger/scripts" = "ways_of_working_skills/skills/one-on-one-ledger/scripts"
+"plugins/ways-of-working/skills/focus-plan/scripts" = "ways_of_working_skills/skills/focus-plan/scripts"
+"plugins/ways-of-working/skills/risk-register-refresh/scripts" = "ways_of_working_skills/skills/risk-register-refresh/scripts"
 
 [tool.hatch.build.targets.sdist]
 include = [

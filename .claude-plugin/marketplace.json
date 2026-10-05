@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "ways-of-working-skills",
-  "description": "Claude Code skills for ways of working that compute from files you already have: change records from Terraform plans, one action ledger across meeting notes, a security exception register lint, an RFC lifecycle lint and a lightweight decision log.",
+  "description": "Nine Claude Code skills for the records a team keeps, from files you already have: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger and focus time from a calendar export.",
   "owner": {
     "name": "Muhammad Basit Ali",
     "url": "https://github.com/basitalisandhu"
@@ -13,7 +13,7 @@
     {
       "name": "ways-of-working",
       "source": "./plugins/ways-of-working",
-      "description": "Ways-of-working skills, each with a tested standard-library script over local files: change-request-writer, meeting-actions-ledger, risk-exception-register, rfc-lifecycle and decision-log. No network, no rating of people.",
+      "description": "Nine ways-of-working skills, each with a tested standard-library script over local files: change-request-writer, meeting-actions-ledger, risk-exception-register, risk-register-refresh, rfc-lifecycle, decision-log, weekly-status-rollup, one-on-one-ledger and focus-plan. No network, no rating of people.",
       "version": "0.1.0",
       "author": {
         "name": "Muhammad Basit Ali",
@@ -22,9 +22,29 @@
       "homepage": "https://github.com/basitalisandhu/ways-of-working-skills",
       "repository": "https://github.com/basitalisandhu/ways-of-working-skills",
       "license": "MIT",
-      "keywords": ["ways-of-working", "change-management", "cab", "terraform-plan", "meeting-actions", "risk-exceptions", "risk-acceptance", "rfc", "design-review", "decision-log"],
+      "keywords": [
+        "ways-of-working",
+        "change-management",
+        "cab",
+        "terraform-plan",
+        "meeting-actions",
+        "risk-exceptions",
+        "risk-acceptance",
+        "rfc",
+        "design-review",
+        "decision-log",
+        "weekly-status",
+        "one-on-one",
+        "focus-time",
+        "risk-register"
+      ],
       "category": "productivity",
-      "tags": ["change-management", "governance", "team-process", "security"]
+      "tags": [
+        "change-management",
+        "governance",
+        "team-process",
+        "security"
+      ]
     }
   ]
 }

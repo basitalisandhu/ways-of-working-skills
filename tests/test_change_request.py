@@ -1,4 +1,5 @@
 """Tests for change_request.py. Inputs are synthetic plan JSON and gh pr view exports built in each test."""
+
 from __future__ import annotations
 
 import json
@@ -9,8 +10,13 @@ mod = load_script("change-request-writer", "change_request.py")
 
 
 def rc_(address: str, rtype: str, actions: list[str], mode: str = "managed") -> dict:
-    return {"address": address, "mode": mode, "type": rtype, "name": address.split(".")[-1],
-            "change": {"actions": actions}}
+    return {
+        "address": address,
+        "mode": mode,
+        "type": rtype,
+        "name": address.split(".")[-1],
+        "change": {"actions": actions},
+    }
 
 
 def plan(tmp_path, changes: list[dict], name: str = "plan.json"):
@@ -97,19 +103,32 @@ def test_malformed_resource_change_and_unknown_shape_exit_2(tmp_path):
 
 def test_pr_export_lists_files_and_flags_by_path(tmp_path):
     pr = tmp_path / "pr.json"
-    pr.write_text(json.dumps({
-        "number": 42, "title": "Tighten runner egress", "url": "https://github.com/example-org/infra/pull/42",
-        "baseRefName": "main", "headRefName": "egress", "labels": [{"name": "infra"}],
-        "files": [{"path": "modules/network/vpc.tf", "additions": 10, "deletions": 2},
-                  {"path": "iam/ci-role.tf", "additions": 4, "deletions": 4},
-                  {"path": "buckets/logs_bucket_policy.json", "additions": 3, "deletions": 0},
-                  {"path": "README.md", "additions": 1, "deletions": 1}],
-    }))
+    pr.write_text(
+        json.dumps(
+            {
+                "number": 42,
+                "title": "Tighten runner egress",
+                "url": "https://github.com/example-org/infra/pull/42",
+                "baseRefName": "main",
+                "headRefName": "egress",
+                "labels": [{"name": "infra"}],
+                "files": [
+                    {"path": "modules/network/vpc.tf", "additions": 10, "deletions": 2},
+                    {"path": "iam/ci-role.tf", "additions": 4, "deletions": 4},
+                    {"path": "buckets/logs_bucket_policy.json", "additions": 3, "deletions": 0},
+                    {"path": "README.md", "additions": 1, "deletions": 1},
+                ],
+            }
+        )
+    )
     rc, rep = run_json(mod, [str(pr)])
     assert rc == 1
     assert rep["counts"] is None and rep["lines"] == {"additions": 18, "deletions": 7}
     assert {n["item"]: n["class"] for n in rep["needs_reviewer"]} == {
-        "modules/network/vpc.tf": "network", "iam/ci-role.tf": "iam", "buckets/logs_bucket_policy.json": "s3-policy"}
+        "modules/network/vpc.tf": "network",
+        "iam/ci-role.tf": "iam",
+        "buckets/logs_bucket_policy.json": "s3-policy",
+    }
     rc, out, _ = run_main(mod, [str(pr)])
     assert "# Change record: Tighten runner egress" in out
     assert "A PR export holds no add, change, destroy or replace counts" in out
@@ -194,9 +213,16 @@ identifiers they hold must be restored separately:
 
 
 def test_golden_markdown_record(tmp_path):
-    p = plan(tmp_path, [rc_("aws_iam_role.ci", "aws_iam_role", ["update"]),
-                        rc_("aws_db_instance.main", "aws_db_instance", ["create", "delete"])])
-    rc, out, _ = run_main(mod, [str(p), "--title", "Rotate CI role", "--change-id", "CHG-0042",
-                                "--window", "2026-10-12 22:00 to 23:00 UTC"])
+    p = plan(
+        tmp_path,
+        [
+            rc_("aws_iam_role.ci", "aws_iam_role", ["update"]),
+            rc_("aws_db_instance.main", "aws_db_instance", ["create", "delete"]),
+        ],
+    )
+    rc, out, _ = run_main(
+        mod,
+        [str(p), "--title", "Rotate CI role", "--change-id", "CHG-0042", "--window", "2026-10-12 22:00 to 23:00 UTC"],
+    )
     assert rc == 1
     assert out == GOLDEN

@@ -1,4 +1,5 @@
 """Tests for the frontmatter scalar check in scripts/validate_plugin.py."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -21,15 +22,18 @@ def test_plain_scalar_with_colon_space_is_rejected():
     assert "line 3" in problems[0] and "'description'" in problems[0]
 
 
-@pytest.mark.parametrize("line", [
-    "description: Use for C # code",
-    "description: Ends with:",
-    "description: *starts with an alias",
-    "description: @mention first",
-    'description: "never closed',
-    "description: 'never closed",
-    'description: "ends with an escaped quote\\"',
-])
+@pytest.mark.parametrize(
+    "line",
+    [
+        "description: Use for C # code",
+        "description: Ends with:",
+        "description: *starts with an alias",
+        "description: @mention first",
+        'description: "never closed',
+        "description: 'never closed",
+        'description: "ends with an escaped quote\\"',
+    ],
+)
 def test_other_defects_are_rejected(line):
     assert len(validator.scalar_problems(doc(line))) == 1
 
@@ -39,15 +43,18 @@ def test_nested_metadata_values_are_checked():
     assert len(problems) == 1 and "line 4" in problems[0]
 
 
-@pytest.mark.parametrize("line", [
-    'description: "Quoted: with a colon # and a hash"',
-    "description: 'Single: quoted'",
-    "description: Plain text, a URL https://example.com/a:b and a#b",
-    "description: C:\\path\\to",
-    "description: >-",
-    "allowed-tools: [Read, Grep]",
-    "name: plain-name",
-])
+@pytest.mark.parametrize(
+    "line",
+    [
+        'description: "Quoted: with a colon # and a hash"',
+        "description: 'Single: quoted'",
+        "description: Plain text, a URL https://example.com/a:b and a#b",
+        "description: C:\\path\\to",
+        "description: >-",
+        "allowed-tools: [Read, Grep]",
+        "name: plain-name",
+    ],
+)
 def test_accepted_forms(line):
     assert validator.scalar_problems(doc(line)) == []
 
@@ -71,7 +78,7 @@ def test_every_skill_md_frontmatter_loads_with_pyyaml():
     yaml = pytest.importorskip("yaml")
     for path in sorted(ROOT.glob("plugins/*/skills/*/SKILL.md")):
         text = path.read_text(encoding="utf-8")
-        data = yaml.safe_load(text[4: text.index("\n---", 4)])
+        data = yaml.safe_load(text[4 : text.index("\n---", 4)])
         assert data["name"] == path.parent.name
         assert isinstance(data["description"], str) and 0 < len(data["description"]) <= 1024
         assert data["license"] == "MIT" and data["compatibility"] and data["metadata"]["author"]

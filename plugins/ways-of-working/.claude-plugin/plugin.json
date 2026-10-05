@@ -2,7 +2,7 @@
   "name": "ways-of-working",
   "displayName": "Ways of Working",
   "version": "0.1.0",
-  "description": "Ways-of-working skills that compute from files you already have: a CAB-style change record from a Terraform plan JSON or PR export with needs-reviewer flags, one action ledger across meeting notes with overdue, ownerless and carried items, a security exception register lint with a review agenda, an RFC writer with a lifecycle lint, and a one-file-per-decision log with review dates and supersede links. Standard-library scripts, no network, no rating of people.",
+  "description": "Nine ways-of-working skills that compute from files you already have: a CAB-style change record from a Terraform plan or PR export, one action ledger across meeting notes, a security exception register lint, a quarterly risk register refresh against findings exports, an RFC writer with a lifecycle lint, a one-file-per-decision log, a weekly status note from git and gh exports, a private 1:1 ledger, and meeting load and focus blocks from a calendar export. Standard-library scripts, no network, no rating of people.",
   "author": {
     "name": "Muhammad Basit Ali",
     "url": "https://github.com/basitalisandhu"
@@ -10,5 +10,23 @@
   "homepage": "https://github.com/basitalisandhu/ways-of-working-skills",
   "repository": "https://github.com/basitalisandhu/ways-of-working-skills",
   "license": "MIT",
-  "keywords": ["ways-of-working", "change-management", "cab", "change-request", "terraform-plan", "meeting-notes", "action-items", "risk-exceptions", "risk-acceptance", "rfc", "design-review", "decision-log"]
+  "keywords": [
+    "ways-of-working",
+    "change-management",
+    "cab",
+    "change-request",
+    "terraform-plan",
+    "meeting-notes",
+    "action-items",
+    "risk-exceptions",
+    "risk-acceptance",
+    "rfc",
+    "design-review",
+    "decision-log",
+    "weekly-status",
+    "one-on-one",
+    "focus-time",
+    "calendar",
+    "risk-register"
+  ]
 }

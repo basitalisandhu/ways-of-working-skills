@@ -34,6 +34,7 @@ Deterministic for the same files and --as-of.
 
 Exit codes: 0 no findings, 1 at least one finding, 2 bad input (folder missing, no decision files, bad --as-of).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -88,8 +89,11 @@ def ids(value: str) -> list[str]:
 def read(folder: Path) -> list[dict]:
     if not folder.is_dir():
         raise InputError(f"{folder}: not a folder")
-    files = sorted(p for p in folder.rglob("*.md") if p.is_file() and p.name.lower() not in ("readme.md", "index.md")
-                   and not p.name.startswith("_"))
+    files = sorted(
+        p
+        for p in folder.rglob("*.md")
+        if p.is_file() and p.name.lower() not in ("readme.md", "index.md") and not p.name.startswith("_")
+    )
     if not files:
         raise InputError(f"{folder}: no decision files (*.md) found")
     records = []
@@ -97,14 +101,16 @@ def read(folder: Path) -> list[dict]:
         lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
         fm, start = front_matter(lines)
         headings = {m.group(1).strip().lower().rstrip(":") for line in lines[start:] if (m := HEADING_RE.match(line))}
-        records.append({
-            "file": p.relative_to(folder).as_posix(),
-            "stem": p.stem,
-            "id": fm.get("id") or p.stem,
-            "fm": fm,
-            "unclosed": bool(lines) and lines[0].strip() == "---" and start == 0,
-            "headings": headings,
-        })
+        records.append(
+            {
+                "file": p.relative_to(folder).as_posix(),
+                "stem": p.stem,
+                "id": fm.get("id") or p.stem,
+                "fm": fm,
+                "unclosed": bool(lines) and lines[0].strip() == "---" and start == 0,
+                "headings": headings,
+            }
+        )
     return records
 
 
@@ -142,8 +148,11 @@ def analyse(records: list[dict], as_of: dt.date) -> dict:
                     add("invalid-date", r, f"{field} {fm[field]!r} is not YYYY-MM-DD")
         review = dates.get("review-date")
         if status in ("active", "proposed") and review and review < as_of:
-            add("review-overdue", r, f"review-date {review.isoformat()} is {(as_of - review).days} days before "
-                                     f"{as_of.isoformat()}")
+            add(
+                "review-overdue",
+                r,
+                f"review-date {review.isoformat()} is {(as_of - review).days} days before {as_of.isoformat()}",
+            )
         for heading in ("context", "decision"):
             if heading not in r["headings"]:
                 add("missing-section", r, f"no '{heading.capitalize()}' section")
@@ -154,10 +163,19 @@ def analyse(records: list[dict], as_of: dt.date) -> dict:
                 add("broken-link", r, f"links to {target!r}, which no decision file has")
         if status == "superseded" and not sup_by:
             add("superseded-without-link", r, "status superseded but superseded-by is empty")
-        rows.append({"id": r["id"], "title": fm.get("title", ""), "status": status or None,
-                     "date": fm.get("date") or None, "review_date": fm.get("review-date") or None,
-                     "decided_by": fm.get("decided-by") or None, "supersedes": sup, "superseded_by": sup_by,
-                     "file": r["file"]})
+        rows.append(
+            {
+                "id": r["id"],
+                "title": fm.get("title", ""),
+                "status": status or None,
+                "date": fm.get("date") or None,
+                "review_date": fm.get("review-date") or None,
+                "decided_by": fm.get("decided-by") or None,
+                "supersedes": sup,
+                "superseded_by": sup_by,
+                "file": r["file"],
+            }
+        )
 
     def resolve(x: str) -> dict | None:
         return by_key.get(x)
@@ -190,22 +208,32 @@ def analyse(records: list[dict], as_of: dt.date) -> dict:
 
 
 def index_md(rep: dict) -> str:
-    out = ["# Decision log", "",
-           "| ID | Title | Status | Date | Review date | Decided by | Supersedes | Superseded by |",
-           "|---|---|---|---|---|---|---|---|"]
+    out = [
+        "# Decision log",
+        "",
+        "| ID | Title | Status | Date | Review date | Decided by | Supersedes | Superseded by |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
     for d in rep["decisions"]:
         title = d["title"].replace("|", "/") or "(no title)"
-        out.append(f"| [{d['id']}]({d['file']}) | {title} | {d['status'] or ''} | {d['date'] or ''} | "
-                   f"{d['review_date'] or ''} | {(d['decided_by'] or '').replace('|', '/')} | "
-                   f"{', '.join(d['supersedes'])} | {', '.join(d['superseded_by'])} |")
+        out.append(
+            f"| [{d['id']}]({d['file']}) | {title} | {d['status'] or ''} | {d['date'] or ''} | "
+            f"{d['review_date'] or ''} | {(d['decided_by'] or '').replace('|', '/')} | "
+            f"{', '.join(d['supersedes'])} | {', '.join(d['superseded_by'])} |"
+        )
     out.append("")
     return "\n".join(out)
 
 
 def render(rep: dict) -> str:
-    out = [index_md(rep).rstrip("\n"), "",
-           f"As of {rep['as_of']}: {len(rep['decisions'])} decision(s), {len(rep['findings'])} finding(s).", "",
-           "## Findings", ""]
+    out = [
+        index_md(rep).rstrip("\n"),
+        "",
+        f"As of {rep['as_of']}: {len(rep['decisions'])} decision(s), {len(rep['findings'])} finding(s).",
+        "",
+        "## Findings",
+        "",
+    ]
     if not rep["findings"]:
         out.append("None.")
     for f in rep["findings"]:

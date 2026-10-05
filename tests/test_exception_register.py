@@ -1,4 +1,5 @@
 """Tests for exception_register.py. Registers are synthetic CSV and Markdown files written in each test."""
+
 from __future__ import annotations
 
 from conftest import load_script, run_json, run_main, write_files
@@ -61,14 +62,17 @@ def test_repeated_renewals_follow_the_renewal_chain(tmp_path):
 
 def test_renewals_without_links_group_by_system_and_control(tmp_path):
     text = "id,system,control,reason,approver,granted,expires,compensating_controls\n" + "".join(
-        f"R-{i},Payroll,A.8.2,reason,CISO,2026-0{i}-01,2027-01-01,logging\n" for i in range(1, 5))
+        f"R-{i},Payroll,A.8.2,reason,CISO,2026-0{i}-01,2027-01-01,logging\n" for i in range(1, 5)
+    )
     _, rep = run_json(mod, [reg(tmp_path, text), *AS_OF])
     assert rules_for(rep) == {"repeated-renewal": ["R-4"]}
 
 
 def test_malformed_rows_and_bad_dates_are_data_problems(tmp_path):
-    text = CSV + ("    EX-9,crm,A.8.5,reason,CISO,2026-01-01,soon,logging,,,\n"
-                  "    EX-6,dup,A.1,r,CISO,2026-01-01,2027-01-01,x,,,\n")
+    text = CSV + (
+        "    EX-9,crm,A.8.5,reason,CISO,2026-01-01,soon,logging,,,\n"
+        "    EX-6,dup,A.1,r,CISO,2026-01-01,2027-01-01,x,,,\n"
+    )
     _, rep = run_json(mod, [reg(tmp_path, text), *AS_OF])
     data = {(f["rule"], f["id"]) for f in rep["findings"] if f["section"] == "data"}
     assert data == {("malformed-row", "EX-8"), ("invalid-date", "EX-9"), ("duplicate-id", "EX-6")}
@@ -105,8 +109,10 @@ def test_empty_and_bad_inputs_exit_2(tmp_path):
 
 
 def test_clean_register_exits_0(tmp_path):
-    text = "id,system,control,reason,approver,granted,expires,compensating_controls\n" \
-           "EX-1,wiki,A.5.15,reason,CISO,2026-01-01,2027-01-01,proxy MFA\n"
+    text = (
+        "id,system,control,reason,approver,granted,expires,compensating_controls\n"
+        "EX-1,wiki,A.5.15,reason,CISO,2026-01-01,2027-01-01,proxy MFA\n"
+    )
     rc, out, _ = run_main(mod, [reg(tmp_path, text), *AS_OF])
     assert rc == 0 and "No findings." in out
 

@@ -32,6 +32,7 @@ sent anywhere. The output is deterministic for the same input and options.
 Exit codes: 0 no needs-reviewer item, 1 at least one needs-reviewer item, 2 bad input (missing, empty or invalid
 file, unknown shape, malformed resource change).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -46,15 +47,50 @@ PLACEHOLDER = "_to be completed by the change owner_"
 TYPE_CLASSES: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = [
     # (class, exact-or-prefix patterns ending in "*" for prefix, substrings)
     ("iam", ("aws_iam_*", "aws_organizations_policy*", "azurerm_role_*"), ("_iam_",)),
-    ("security-group", ("aws_security_group*", "aws_vpc_security_group_*", "aws_network_acl*",
-                        "azurerm_network_security_*", "google_compute_firewall*"), ()),
+    (
+        "security-group",
+        (
+            "aws_security_group*",
+            "aws_vpc_security_group_*",
+            "aws_network_acl*",
+            "azurerm_network_security_*",
+            "google_compute_firewall*",
+        ),
+        (),
+    ),
     ("kms", ("aws_kms_*", "google_kms_*", "azurerm_key_vault_key*"), ()),
-    ("s3-policy", ("aws_s3_bucket_policy", "aws_s3_bucket_acl", "aws_s3_bucket_public_access_block",
-                   "aws_s3_account_public_access_block", "aws_s3_bucket_ownership_controls"), ()),
-    ("network", ("aws_vpc*", "aws_subnet*", "aws_route*", "aws_internet_gateway*", "aws_nat_gateway*",
-                 "aws_ec2_transit_gateway*", "aws_vpn_*", "aws_networkfirewall_*", "aws_lb_listener*",
-                 "azurerm_virtual_network*", "azurerm_subnet*", "azurerm_route*", "google_compute_network*",
-                 "google_compute_subnetwork*", "google_compute_route*"), ()),
+    (
+        "s3-policy",
+        (
+            "aws_s3_bucket_policy",
+            "aws_s3_bucket_acl",
+            "aws_s3_bucket_public_access_block",
+            "aws_s3_account_public_access_block",
+            "aws_s3_bucket_ownership_controls",
+        ),
+        (),
+    ),
+    (
+        "network",
+        (
+            "aws_vpc*",
+            "aws_subnet*",
+            "aws_route*",
+            "aws_internet_gateway*",
+            "aws_nat_gateway*",
+            "aws_ec2_transit_gateway*",
+            "aws_vpn_*",
+            "aws_networkfirewall_*",
+            "aws_lb_listener*",
+            "azurerm_virtual_network*",
+            "azurerm_subnet*",
+            "azurerm_route*",
+            "google_compute_network*",
+            "google_compute_subnetwork*",
+            "google_compute_route*",
+        ),
+        (),
+    ),
 ]
 
 PATH_CLASSES: list[tuple[str, re.Pattern[str]]] = [
@@ -63,8 +99,14 @@ PATH_CLASSES: list[tuple[str, re.Pattern[str]]] = [
     ("iam", re.compile(r"(?:^|[/_.-])(?:iam|scp|policy|policies|role|roles)(?:$|[/_.-])", re.I)),
     ("security-group", re.compile(r"security[_-]?group|firewall|(?:^|[/_.-])(?:sg|nacl)(?:$|[/_.-])", re.I)),
     ("kms", re.compile(r"(?:^|[/_.-])kms(?:$|[/_.-])", re.I)),
-    ("network", re.compile(r"(?:^|[/_.-])(?:vpc|subnets?|routes?|route[_-]?tables?|network|transit[_-]?gateway|"
-                           r"nat)(?:$|[/_.-])", re.I)),
+    (
+        "network",
+        re.compile(
+            r"(?:^|[/_.-])(?:vpc|subnets?|routes?|route[_-]?tables?|network|transit[_-]?gateway|"
+            r"nat)(?:$|[/_.-])",
+            re.I,
+        ),
+    ),
 ]
 
 ACTION_KIND = {
@@ -118,8 +160,9 @@ def detect(data: object) -> str:
             return "terraform-plan"
         if "number" in data and ("files" in data or "title" in data):
             return "pull-request"
-    raise InputError("input is neither a Terraform plan JSON (resource_changes) nor a gh pr view export "
-                     "(number with files or title)")
+    raise InputError(
+        "input is neither a Terraform plan JSON (resource_changes) nor a gh pr view export (number with files or title)"
+    )
 
 
 def analyse_plan(data: dict) -> dict:
@@ -164,8 +207,9 @@ def analyse_plan(data: dict) -> dict:
         "counts": {k: counts[k] for k in KINDS} | {"unchanged": counts["unchanged"]},
         "by_type": dict(sorted(by_type.items())),
         "resources": resources,
-        "needs_reviewer": [{"item": r["address"], "class": r["class"], "action": r["action"], "basis": "type"}
-                           for r in needs],
+        "needs_reviewer": [
+            {"item": r["address"], "class": r["class"], "action": r["action"], "basis": "type"} for r in needs
+        ],
         "risk_tier": tier,
     }
 
@@ -178,16 +222,28 @@ def analyse_pr(data: dict) -> dict:
     for i, f in enumerate(files):
         if not isinstance(f, dict) or not isinstance(f.get("path"), str):
             raise InputError(f"files[{i}]: needs a path")
-        rows.append({"path": f["path"], "additions": int(f.get("additions") or 0),
-                     "deletions": int(f.get("deletions") or 0), "class": classify_path(f["path"])})
+        rows.append(
+            {
+                "path": f["path"],
+                "additions": int(f.get("additions") or 0),
+                "deletions": int(f.get("deletions") or 0),
+                "class": classify_path(f["path"]),
+            }
+        )
     rows.sort(key=lambda r: r["path"])
-    needs = [{"item": r["path"], "class": r["class"], "action": "edit", "basis": "path match"} for r in rows
-             if r["class"]]
+    needs = [
+        {"item": r["path"], "class": r["class"], "action": "edit", "basis": "path match"} for r in rows if r["class"]
+    ]
     return {
         "source": "pull-request",
-        "pr": {"number": data.get("number"), "title": data.get("title"), "url": data.get("url"),
-               "base": data.get("baseRefName"), "head": data.get("headRefName"),
-               "labels": sorted(lb.get("name", "") for lb in data.get("labels") or [] if isinstance(lb, dict))},
+        "pr": {
+            "number": data.get("number"),
+            "title": data.get("title"),
+            "url": data.get("url"),
+            "base": data.get("baseRefName"),
+            "head": data.get("headRefName"),
+            "labels": sorted(lb.get("name", "") for lb in data.get("labels") or [] if isinstance(lb, dict)),
+        },
         "counts": None,
         "files": rows,
         "lines": {"additions": sum(r["additions"] for r in rows), "deletions": sum(r["deletions"] for r in rows)},
@@ -217,12 +273,16 @@ def render(rep: dict, title: str, change_id: str | None, window: str | None, inp
     out.append("")
     if rep["counts"] is not None:
         c = rep["counts"]
-        out.append(f"Plan: {c['add']} to add, {c['change']} to change, {c['destroy']} to destroy, "
-                   f"{c['replace']} to replace ({c['unchanged']} unchanged, not listed).")
+        out.append(
+            f"Plan: {c['add']} to add, {c['change']} to change, {c['destroy']} to destroy, "
+            f"{c['replace']} to replace ({c['unchanged']} unchanged, not listed)."
+        )
     else:
         lines = rep["lines"]
-        out.append(f"Pull request touches {len(rep['files'])} file(s), +{lines['additions']} -{lines['deletions']} "
-                   "lines. A PR export holds no add, change, destroy or replace counts: attach the plan JSON for them.")
+        out.append(
+            f"Pull request touches {len(rep['files'])} file(s), +{lines['additions']} -{lines['deletions']} "
+            "lines. A PR export holds no add, change, destroy or replace counts: attach the plan JSON for them."
+        )
     out.append("")
     out.append(f"Purpose: {PLACEHOLDER}")
     out.append("")
@@ -252,8 +312,10 @@ def render(rep: dict, title: str, change_id: str | None, window: str | None, inp
     out.append("")
     out.append("## Risk")
     out.append("")
-    out.append(f"Tier: **{rep['risk_tier']}** (rule: high when any needs-reviewer item, destroy or replace; medium "
-               "for in-place changes only; low for additions only).")
+    out.append(
+        f"Tier: **{rep['risk_tier']}** (rule: high when any needs-reviewer item, destroy or replace; medium "
+        "for in-place changes only; low for additions only)."
+    )
     out.append("")
     if rep["needs_reviewer"]:
         out.append("| Needs reviewer | Class | Action | Basis |")
@@ -271,8 +333,10 @@ def render(rep: dict, title: str, change_id: str | None, window: str | None, inp
     out.append(f"Rollback plan: {PLACEHOLDER} (for example, revert the commit and apply the previous configuration).")
     if gone:
         out.append("")
-        out.append("These resources are destroyed or replaced; re-applying the old configuration creates new ones, so "
-                   "any data or identifiers they hold must be restored separately:")
+        out.append(
+            "These resources are destroyed or replaced; re-applying the old configuration creates new ones, so "
+            "any data or identifiers they hold must be restored separately:"
+        )
         out.append("")
         for r in gone:
             out.append(f"- `{r['address']}` ({r['action']})")
@@ -311,8 +375,9 @@ def build_parser() -> argparse.ArgumentParser:
         epilog="Exit codes: 0 no needs-reviewer item, 1 at least one, 2 bad input.",
     )
     p.add_argument("input", help="plan JSON (terraform show -json plan.out > plan.json) or gh pr view --json export")
-    p.add_argument("--title", default="",
-                   help="title for the record (default: the PR title or 'infrastructure change')")
+    p.add_argument(
+        "--title", default="", help="title for the record (default: the PR title or 'infrastructure change')"
+    )
     p.add_argument("--change-id", default=None, help="change ticket or reference to print (default: placeholder)")
     p.add_argument("--window", default=None, help="maintenance window text (default: placeholder)")
     p.add_argument("--json", action="store_true", help="print the computed data as JSON instead of Markdown")

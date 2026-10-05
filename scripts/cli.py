@@ -10,6 +10,7 @@ the same Python, stdin, stdout, stderr and exit code. Standard library only. Thi
 container image ghcr.io/basitalisandhu/ways-of-working-skills and of the ways-of-working-skills Python package.
 To add a skill, add one entry to COMMANDS.
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -53,6 +54,26 @@ COMMANDS: dict[str, tuple[str, str, str]] = {
         "decision-log",
         "decision_log.py",
         "List, lint and index a folder of one-file-per-decision records",
+    ),
+    "weekly-status": (
+        "weekly-status-rollup",
+        "weekly_status_rollup.py",
+        "One lead's weekly status note from git log and gh exports, with carried-over items",
+    ),
+    "one-on-one": (
+        "one-on-one-ledger",
+        "one_on_one_ledger.py",
+        "Private per-person 1:1 ledger: cadence gaps, open commitments, repeated topics",
+    ),
+    "focus-plan": (
+        "focus-plan",
+        "focus_plan.py",
+        "Meeting load, back-to-back runs and free blocks from a calendar export (.ics)",
+    ),
+    "risk-refresh": (
+        "risk-register-refresh",
+        "risk_register_refresh.py",
+        "Quarterly risk register refresh against findings exports and last quarter's snapshot",
     ),
 }
 

@@ -1,4 +1,5 @@
 """Tests for meeting_ledger.py. Each test writes a synthetic notes folder into tmp_path."""
+
 from __future__ import annotations
 
 import json
@@ -64,15 +65,22 @@ def test_carry_threshold_is_configurable(tmp_path):
 
 
 def test_malformed_line_is_reported_and_the_run_continues(tmp_path):
-    folder = notes(tmp_path, {"2026-09-01-sync.md": """
+    folder = notes(
+        tmp_path,
+        {
+            "2026-09-01-sync.md": """
         - [ ] Platform team: fix the backup alert (due 2026-13-40)
         - [ ]
         - [ ] Platform team: renew the certificate (due 2026-11-01)
-        """})
+        """
+        },
+    )
     rc, rep = run_json(mod, [folder, *AS_OF])
     assert rc == 1
     assert [(b["line"], b["problem"]) for b in rep["not_understood"]] == [
-        (1, "due date '2026-13-40' is not a valid YYYY-MM-DD date"), (2, "action has no text")]
+        (1, "due date '2026-13-40' is not a valid YYYY-MM-DD date"),
+        (2, "action has no text"),
+    ]
     assert [a["text"] for a in rep["actions"]] == ["renew the certificate"]
     rc, _, err = run_main(mod, [folder, *AS_OF])
     assert "2026-09-01-sync.md:1" in err
@@ -92,10 +100,13 @@ def test_empty_and_missing_inputs(tmp_path):
 
 
 def test_date_line_and_undated_files_set_the_order(tmp_path):
-    folder = notes(tmp_path, {
-        "b-retro.md": "Date: 2026-09-01\n- [ ] Ops: archive old tickets\n",
-        "a-misc.txt": "- [x] Ops: archive old tickets\n",
-    })
+    folder = notes(
+        tmp_path,
+        {
+            "b-retro.md": "Date: 2026-09-01\n- [ ] Ops: archive old tickets\n",
+            "a-misc.txt": "- [x] Ops: archive old tickets\n",
+        },
+    )
     _, rep = run_json(mod, [folder, *AS_OF])
     assert rep["meetings"] == [{"file": "b-retro.md", "date": "2026-09-01"}, {"file": "a-misc.txt", "date": None}]
     assert rep["actions"][0]["status"] == "done"

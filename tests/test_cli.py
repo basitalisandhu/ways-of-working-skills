@@ -1,4 +1,5 @@
 """Tests for scripts/cli.py, the ways-of-working dispatcher used as the container and package entrypoint."""
+
 from __future__ import annotations
 
 import json
@@ -108,6 +109,11 @@ def test_package_layout_finds_skills_next_to_the_module(tmp_path):
     pkg.mkdir()
     shutil.copy(CLI, pkg / "cli.py")
     shutil.copytree(ROOT / "plugins" / "ways-of-working" / "skills", pkg / "skills")
-    result = subprocess.run([sys.executable, str(pkg / "cli.py"), "decision-log", "--help"], capture_output=True,
-                            text=True, timeout=60, cwd=tmp_path)
+    result = subprocess.run(
+        [sys.executable, str(pkg / "cli.py"), "decision-log", "--help"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        cwd=tmp_path,
+    )
     assert result.returncode == 0 and result.stdout.startswith("usage: decision_log.py")
