@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-05
+
+### Changed
+
+- All 12 skill descriptions rewritten to under 600 characters, goal before mechanism, each with one quoted trigger phrase, a "Use when" sentence and a "Not for" boundary.
+- `scripts/validate_plugin.py` fails on a description that is not one double-quoted line, is over 600 characters, or lacks "Use " or "Not for", and on a SKILL.md without `## Limits`; tests cover each rule.
+- Tests and the validator read and write text as UTF-8 explicitly; `.gitattributes` keeps LF line endings on every platform.
+- CI runs the test suite on Windows as well as Linux and macOS.
+- `focus-plan`: the unknown `--tz` error says to install `tzdata` on Windows, where Python ships no IANA zone data; the Limits section says the same. The calendar test fixture is written as bytes so its CRLF line endings survive on Windows.
+- The root and plugin READMEs list the searches this pack answers: "meeting overload", "action items", "weekly update".
+
 ## [0.2.0] - 2026-10-05
 
 ### Added
@@ -33,6 +44,7 @@ All notable changes to this project are documented here. The format follows Keep
 - `release.yml`: PyPI trusted publishing of the `ways-of-working-skills` package, off until the repository variable `PYPI_PUBLISH` is `true`.
 - Tasks for new contributors in `docs/good-first-issues.md`.
 
-[Unreleased]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/basitalisandhu/ways-of-working-skills/releases/tag/v0.1.0

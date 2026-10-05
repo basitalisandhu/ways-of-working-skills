@@ -1,6 +1,6 @@
 ---
 name: focus-plan
-description: "Analyse meeting load from a saved calendar export (.ics) with a bundled standard-library script that reports meetings and hours in meetings per day, back-to-back runs, the longest free blocks inside working hours, recurring series with their occurrence counts, and a plain-language focus plan for the week; recurring rules it cannot expand are listed as not expanded, never guessed. Inputs: one .ics file exported from Outlook, Google Calendar or Apple Calendar, plus working hours and the week to look at. Use when asked \"where can I find focus time this week?\", \"how meeting-heavy is my week?\", \"which days have no deep work block?\", or \"which recurring meetings eat my time?\". Not for writing to or changing a calendar, not for reading mail or meeting content, and not for judging which meetings to decline."
+description: "Find focus time in a meeting-heavy week from a saved .ics calendar export (Outlook, Google or Apple): meetings and hours per day, back-to-back runs, the longest free blocks inside working hours, recurring series with counts, and a plain focus plan; recurring rules it cannot expand are listed, never guessed. Use when asked \"where can I find focus time this week?\" or about meeting overload. Not for changing a calendar, reading mail or meeting content, or deciding which meetings to decline."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. The export step is done by the user in their calendar app.
 metadata:
@@ -82,6 +82,7 @@ Markdown with these sections: Load per day (meetings, hours in meetings with ove
 ## Limits
 
 - Only FREQ=DAILY and FREQ=WEEKLY rules with INTERVAL, COUNT, UNTIL, WKST and plain BYDAY codes are expanded, with EXDATE and RECURRENCE-ID applied. Monthly, yearly and BYSETPOS rules are listed as not expanded and only their first occurrence is counted.
+- On Windows, Python has no IANA zone data of its own: install it with `pip install tzdata`, or only `--tz UTC` works and every TZID falls back to the analysis zone.
 - A TZID that is not an IANA zone name (for example a Windows zone name in some Outlook exports) is read in the analysis time zone, and the script warns about it on every such line.
 - Meetings are placed on the day they start; a timed event that crosses midnight counts only up to midnight.
 - Cancelled events and events marked "show as free" are left out; all-day events are listed but not counted as meeting time.

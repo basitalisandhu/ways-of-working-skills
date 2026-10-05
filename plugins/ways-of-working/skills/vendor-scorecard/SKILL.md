@@ -1,6 +1,6 @@
 ---
 name: vendor-scorecard
-description: "Score vendors or tools against weighted criteria from a CSV with one row per criterion (criterion, weight, then one column per vendor with scores 1 to 5). A bundled script computes the weighted score and ranking, checks whether the ranking survives each weight being moved one step up or down, flags ties for first and data problems, and writes a Markdown scorecard with a blank decision line. Use when asked to compare vendors, tools or suppliers on agreed criteria, build a selection scorecard, or test whether a shortlist result depends on the weights. Not for deciding which criteria matter, pricing negotiation, or security questionnaires and vendor evidence (compliance-evidence-skills covers evidence)."
+description: "Compare vendors, tools or suppliers on agreed weighted criteria from a CSV (criterion, weight, a 1 to 5 score column per vendor): weighted scores and ranking, whether the ranking survives each weight moved one step, ties for first, data problems, and a Markdown scorecard with a blank decision line. Use when asked to \"build a vendor scorecard\" or whether a shortlist depends on the weights. Not for choosing the criteria, pricing negotiation, or security questionnaires and vendor evidence (compliance-evidence-skills)."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads a CSV you keep.
 metadata:

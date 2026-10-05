@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 
 import pytest
 from conftest import ROOT
@@ -80,7 +81,72 @@ def test_every_skill_md_frontmatter_loads_with_pyyaml():
         text = path.read_text(encoding="utf-8")
         data = yaml.safe_load(text[4 : text.index("\n---", 4)])
         assert data["name"] == path.parent.name
-        assert isinstance(data["description"], str) and 0 < len(data["description"]) <= 1024
+        assert isinstance(data["description"], str) and 0 < len(data["description"]) <= 600
         assert data["license"] == "MIT" and data["compatibility"] and data["metadata"]["author"]
         raw = next(line for line in text.splitlines() if line.startswith("description:"))
         assert raw.startswith('description: "') and raw.endswith('"'), str(path.relative_to(ROOT))
+
+
+def quoted(desc: str) -> str:
+    return "---\nname: x\ndescription: " + json.dumps(desc) + "\n---\n\nBody.\n"
+
+
+GOOD = 'Check a thing for a reason. Use when asked "is this fine?". Not for other things.'
+
+
+def test_good_description_passes():
+    assert validator.description_problems(quoted(GOOD)) == []
+
+
+def test_description_over_600_chars_is_rejected():
+    problems = validator.description_problems(quoted(GOOD + " " + "x" * 600))
+    assert len(problems) == 1 and "house limit 600" in problems[0]
+
+
+def test_description_of_exactly_600_chars_passes():
+    desc = GOOD + " " + "x" * (600 - len(GOOD) - 1)
+    assert len(desc) == 600 and validator.description_problems(quoted(desc)) == []
+
+
+def test_description_without_use_is_rejected():
+    assert validator.description_problems(quoted("Check a thing. Not for other things.")) == [
+        'description has no "Use ..." sentence'
+    ]
+
+
+def test_description_without_not_for_is_rejected():
+    assert validator.description_problems(quoted("Check a thing. Use when asked. Not other things.")) == [
+        'description has no "Not for" boundary'
+    ]
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "description: Check a thing. Use when asked. Not for other things.",
+        "description: 'Check a thing. Use when asked. Not for other things.'",
+        "description: >-",
+    ],
+)
+def test_unquoted_description_is_rejected(line):
+    problems = validator.description_problems("---\nname: x\n" + line + "\n---\n")
+    assert problems == ["description must be a single double-quoted line"]
+
+
+def test_missing_description_is_reported():
+    assert validator.description_problems("---\nname: x\n---\n") == ["no description"]
+
+
+def test_limits_section_is_detected():
+    assert validator.has_limits_section("# T\n\n## Limits\n\n- one\n")
+    assert not validator.has_limits_section("# T\n\n## Limitations\n\n- one\n")
+    assert not validator.has_limits_section("# T\n\nSee ## Limits inline\n")
+
+
+def test_every_skill_md_in_this_repository_meets_the_description_and_limits_rules():
+    skills = sorted(ROOT.glob("plugins/*/skills/*/SKILL.md"))
+    assert len(skills) == 12
+    for path in skills:
+        text = path.read_text(encoding="utf-8")
+        assert validator.description_problems(text) == [], str(path.relative_to(ROOT))
+        assert validator.has_limits_section(text), str(path.relative_to(ROOT))

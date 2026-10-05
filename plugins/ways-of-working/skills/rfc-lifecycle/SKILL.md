@@ -1,6 +1,6 @@
 ---
 name: rfc-lifecycle
-description: "Write a design proposal (RFC) with a fixed section list and a security review checklist, then lint a folder of RFCs with a bundled script that checks the status header (draft, review, accepted, rejected, superseded), review threads with a Q line and no A line, open questions left in review or accepted RFCs, a missing decision date, missing sections, and RFCs in review for more than 14 days. Use when asked to draft an RFC or design proposal, to check which RFCs are stuck in review, or to see which review questions are still unanswered. Not for architecture decision records (use adr-writer once the RFC is accepted), not for choosing the design, and not a replacement for the review itself."
+description: "Draft a design proposal (RFC) with a fixed section list and a security review checklist, then lint a folder of RFCs for the status header, review questions with no answer, open questions left in review or accepted RFCs, a missing decision date or section, and RFCs in review over 14 days. Use when asked to \"draft an RFC for this design\" or which RFCs are stuck in review. Not for architecture decision records (adr-writer once accepted), choosing the design, or replacing the review itself."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads a folder of RFC Markdown files.
 metadata:

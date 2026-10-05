@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ways-of-working-skills"
-version = "0.2.0"
+version = "0.2.1"
 description = "Ways-of-working records computed from files you already have: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger, focus time from a calendar export, a vendor scorecard with a sensitivity check, a working agreement check against GitHub settings, and a shift handover note from incident and alert exports."
 readme = "README.md"
 requires-python = ">=3.10"

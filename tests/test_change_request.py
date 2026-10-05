@@ -21,7 +21,10 @@ def rc_(address: str, rtype: str, actions: list[str], mode: str = "managed") -> 
 
 def plan(tmp_path, changes: list[dict], name: str = "plan.json"):
     p = tmp_path / name
-    p.write_text(json.dumps({"format_version": "1.2", "terraform_version": "1.9.5", "resource_changes": changes}))
+    p.write_text(
+        json.dumps({"format_version": "1.2", "terraform_version": "1.9.5", "resource_changes": changes}),
+        encoding="utf-8",
+    )
     return p
 
 
@@ -80,11 +83,11 @@ def test_empty_plan_gives_a_record_with_no_changes(tmp_path):
 
 def test_empty_file_and_invalid_json_exit_2(tmp_path):
     empty = tmp_path / "empty.json"
-    empty.write_text("")
+    empty.write_text("", encoding="utf-8")
     rc, _, err = run_main(mod, [str(empty)])
     assert rc == 2 and "file is empty" in err
     broken = tmp_path / "broken.json"
-    broken.write_text('{"resource_changes": [')
+    broken.write_text('{"resource_changes": [', encoding="utf-8")
     rc, _, err = run_main(mod, [str(broken)])
     assert rc == 2 and "not valid JSON" in err
     rc, _, err = run_main(mod, [str(tmp_path / "missing.json")])
@@ -96,7 +99,7 @@ def test_malformed_resource_change_and_unknown_shape_exit_2(tmp_path):
     rc, _, err = run_main(mod, [str(p)])
     assert rc == 2 and "resource_changes[0]" in err and "change.actions" in err
     other = tmp_path / "other.json"
-    other.write_text('{"hello": "world"}')
+    other.write_text('{"hello": "world"}', encoding="utf-8")
     rc, _, err = run_main(mod, [str(other)])
     assert rc == 2 and "neither a Terraform plan" in err
 
@@ -119,7 +122,8 @@ def test_pr_export_lists_files_and_flags_by_path(tmp_path):
                     {"path": "README.md", "additions": 1, "deletions": 1},
                 ],
             }
-        )
+        ),
+        encoding="utf-8",
     )
     rc, rep = run_json(mod, [str(pr)])
     assert rc == 1

@@ -1,6 +1,6 @@
 ---
 name: working-agreement-check
-description: "Check a team's written working agreement (a Markdown list of rules such as 'PRs need one review', 'main is protected', 'CI must pass', 'CODEOWNERS covers src/') against saved GitHub exports: the branch protection JSON, rulesets JSON, the CODEOWNERS file and the workflow list. A bundled script maps each recognised rule to a check and reports it as met, not met, or not checkable from these exports, with the evidence, and lists rules it does not recognise. Use when asked whether the repository settings match what the team agreed, before a team retro on process, or after changing branch protection. Not for audit evidence (github-change-control-evidence does that), checking README claims against code (docs-truth-check), or changing any setting."
+description: "Check whether repository settings match a team's written working agreement (rules such as 'PRs need one review' or 'main is protected') using saved branch protection and rulesets JSON, CODEOWNERS and the workflow list: each rule met, not met or not checkable, with evidence, and unrecognised rules listed. Use when asked \"do our repo settings match what we agreed?\" or before a process retro. Not for audit evidence (github-change-control-evidence), README claims against code (docs-truth-check), or changing any setting."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads files you exported with gh.
 metadata:

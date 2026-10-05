@@ -4,6 +4,8 @@
 
 ways-of-working-skills is a Claude Code plugin for the records that keep a team honest about its own process: what a change will do before the board approves it, which actions from last month's meetings are still open, which security exceptions have expired and which risks need a fresh look, which design proposals are stuck in review, which operational decisions are due for a second look, what a lead shipped this week, what each side promised in 1:1s, where the focus time went, whether a vendor choice survives a change of weights, whether the repository settings match the team's working agreement, and what the next on-call shift needs to know. These records usually live in files nobody re-reads. Each skill here reads those files with a small Python script, applies stated rules, cites the file and line behind every finding, and leaves decisions to people.
 
+Find this when you search for: "meeting overload", "action items", "weekly update".
+
 ```text
 /plugin marketplace add basitalisandhu/ways-of-working-skills
 /plugin install ways-of-working@ways-of-working-skills
@@ -92,7 +94,7 @@ The plugin installs as shown at the top. The scripts are also available without 
 - **Container image** (GitHub Packages, linux/amd64 and linux/arm64), entrypoint `ways-of-working <subcommand> [args]`; mount the input folder at `/work`. The image is published when a version tag is pushed, signed with cosign (keyless), with a build provenance attestation and an SPDX SBOM attached to the GitHub Release:
 
   ```bash
-  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.2.0 meeting-ledger /work/notes --as-of 2026-10-05
+  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.2.1 meeting-ledger /work/notes --as-of 2026-10-05
   ```
 
 - **Python package** `ways-of-working-skills`, which installs the same `ways-of-working` command. PyPI publishing is set up in `release.yml` but switched off until the trusted publisher is configured, so until then install from a clone: `pip install .`

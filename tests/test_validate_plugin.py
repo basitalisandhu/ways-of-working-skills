@@ -10,6 +10,7 @@ def test_repository_passes_its_own_validator():
         [sys.executable, str(ROOT / "scripts" / "validate_plugin.py")],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=120,
         check=False,
     )

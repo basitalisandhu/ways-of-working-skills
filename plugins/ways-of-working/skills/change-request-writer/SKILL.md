@@ -1,6 +1,6 @@
 ---
 name: change-request-writer
-description: "Write a CAB-style change record from a saved Terraform plan JSON (terraform show -json plan.out) or a saved gh pr view --json export. A bundled script counts resources to add, change, destroy and replace, lists them by type, flags IAM, security group, KMS, S3 policy and network changes as needs reviewer, tiers the risk by a stated rule, and prints a Markdown record with summary, scope, risk, rollback, verification, an approvers table and a maintenance window placeholder. Use when asked to write a change request, CAB record, RFC for change or change ticket for an infrastructure change, to say what a plan will destroy or replace, or which changes need a security reviewer. Not for approving changes, running terraform, reviewing the Terraform code itself, or ServiceNow and Jira integration."
+description: "Write a CAB-style change record for an infrastructure change from a saved Terraform plan JSON or gh pr view export: counts of resources to add, change, destroy and replace, IAM, security group, KMS, S3 policy and network changes flagged for a reviewer, a risk tier by a stated rule, and rollback, verification and approvers sections. Use when asked to \"write a change request for this plan\" or what a plan will destroy or replace. Not for approving changes, running terraform, reviewing the Terraform code, or ServiceNow and Jira integration."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads a plan JSON or PR export you saved.
 metadata:

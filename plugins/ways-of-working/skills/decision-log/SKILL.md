@@ -1,6 +1,6 @@
 ---
 name: decision-log
-description: "Keep a lightweight decision log with one Markdown file per decision (context in two sentences, the decision, who decided, date, review date, status, supersedes and superseded-by links), and lint the folder with a bundled script that lists every decision, flags reviews that are overdue, broken or one-way supersede links, supersede cycles and missing fields, and renders an INDEX.md table. Use when asked to record an operational decision, to find which decisions are due for review, or to rebuild the decision index. Not for architecture decisions with options analysis (use adr-writer), not for recovering old decisions from git history (use adr-miner), and not for choosing between options."
+description: "Record operational decisions as one Markdown file each (context, decision, who decided, date, review date, status, supersede links) and lint the folder for overdue reviews, broken or one-way supersede links, cycles and missing fields, rendering an INDEX.md table. Use when asked to \"log this decision\", to find decisions due for review, or to rebuild the index. Not for architecture decisions with options analysis (adr-writer), recovering old decisions from git history (adr-miner), or choosing between options."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads a folder of decision files.
 metadata:

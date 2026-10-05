@@ -1,6 +1,6 @@
 ---
 name: one-on-one-ledger
-description: "Keep a private per-person 1:1 ledger from your own local notes with a bundled standard-library script that tracks days since the last 1:1 against an expected cadence, earlier gaps, open commitments on each side (yours first, overdue ones marked), and topics raised more than once, then renders one ledger per person or a prep sheet for one person. Inputs: a local folder of Markdown or text notes, either one file per person with dated sections or dated files with a section per person. Use when asked \"prep my 1:1 with Sam\", \"who am I overdue a 1:1 with?\", \"what did I promise in my 1:1s?\", or \"which topics keep coming back?\". Not for performance reviews, ratings, rankings, sentiment scoring or comparing people, not for notes kept in a shared drive or repository (the script refuses those paths), and not for sending anything to anyone."
+description: "Prepare for 1:1s from your own local notes: days since the last 1:1 against a cadence, open commitments on each side (yours first, overdue marked) and topics raised more than once, as a ledger per person or a prep sheet for one. Use when asked to \"prep my 1:1 with Sam\" or who you are overdue a 1:1 with. Not for performance reviews, ratings, rankings, sentiment or comparing people, notes in a shared drive or repository (the script refuses those paths), or sending anything to anyone."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Notes must sit in a private local folder.
 metadata:
