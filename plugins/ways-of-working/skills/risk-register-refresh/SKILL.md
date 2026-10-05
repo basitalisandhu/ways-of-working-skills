@@ -78,7 +78,7 @@ Save the register as CSV from the spreadsheet it lives in, and keep last quarter
 4. Record the owners' decisions in the register themselves; do not edit the register on their behalf unless asked for a specific change.
 
 ## Script
-
+From a copy install, run `scripts/risk_register.py` from the skill folder.
 | Option | Effect |
 |---|---|
 | `register` | the current register CSV |
@@ -89,6 +89,7 @@ Save the register as CSV from the spreadsheet it lives in, and keep last quarter
 | `--output PATH` | write the refresh to this file; nothing else is written |
 
 Exit codes: 0 nothing flagged, 1 at least one row needs review, 2 bad input (missing file or columns, invalid JSON, bad date). Added and removed risks are listed but do not set exit code 1 on their own.
+
 
 ## Output
 

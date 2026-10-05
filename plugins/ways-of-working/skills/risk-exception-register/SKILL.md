@@ -57,7 +57,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" register.md --window 60 --out agenda.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" exceptions.csv --renewal-limit 1 --json
 ```
-
+From a copy install, run `scripts/risk_exception.py` from the skill folder.
 | Option | Effect |
 |---|---|
 | `register` | the CSV or Markdown file |

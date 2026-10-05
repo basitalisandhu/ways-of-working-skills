@@ -58,7 +58,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/meeting-actions-ledger/scripts/meeting_led
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/meeting-actions-ledger/scripts/meeting_ledger.py" notes/ --as-of 2026-10-05 --out ledger/
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/meeting-actions-ledger/scripts/meeting_ledger.py" notes/ --carry 2 --json
 ```
-
+From a copy install, run `scripts/meeting_ledger.py` from the skill folder.
 | Option | Effect |
 |---|---|
 | `folder` | the notes folder |

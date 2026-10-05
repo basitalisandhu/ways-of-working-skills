@@ -60,6 +60,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/decision-log/scripts/decision_log.py" deci
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/decision-log/scripts/decision_log.py" decisions/ --index decisions/INDEX.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/decision-log/scripts/decision_log.py" decisions/ --json
 ```
+From a copy install, run `scripts/decision_log.py` from the skill folder.
 
 | Option | Effect |
 |---|---|

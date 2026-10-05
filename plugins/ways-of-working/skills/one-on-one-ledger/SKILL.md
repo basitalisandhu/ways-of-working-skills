@@ -73,7 +73,7 @@ Line syntax inside a section: `- topic: <text>`; `- [ ] me: <text>` or `- [ ] th
 5. If the user wants a follow-up note for the other person, draft it for them to send themselves. Never send it.
 
 ## Script
-
+From a copy install, run `scripts/one_on_one_ledger.py` from the skill folder.
 | Option | Effect |
 |---|---|
 | `notes` | the private notes folder |
