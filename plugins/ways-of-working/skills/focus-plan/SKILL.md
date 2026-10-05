@@ -82,6 +82,7 @@ Markdown with these sections: Load per day (meetings, hours in meetings with ove
 ## Limits
 
 - Only FREQ=DAILY and FREQ=WEEKLY rules with INTERVAL, COUNT, UNTIL, WKST and plain BYDAY codes are expanded, with EXDATE and RECURRENCE-ID applied. Monthly, yearly and BYSETPOS rules are listed as not expanded and only their first occurrence is counted.
+- On Windows, Python has no IANA zone data of its own: install it with `pip install tzdata`, or only `--tz UTC` works and every TZID falls back to the analysis zone.
 - A TZID that is not an IANA zone name (for example a Windows zone name in some Outlook exports) is read in the analysis time zone, and the script warns about it on every such line.
 - Meetings are placed on the day they start; a timed event that crosses midnight counts only up to midnight.
 - Cancelled events and events marked "show as free" are left out; all-day events are listed but not counted as meeting time.

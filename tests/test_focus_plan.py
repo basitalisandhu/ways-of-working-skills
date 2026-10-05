@@ -25,7 +25,7 @@ def vevent(uid: str, summary: str, start: str, end: str | None = None, *extra: s
 def calendar(tmp_path: Path, *events: str, name: str = "cal.ics") -> str:
     body = "\r\n".join(["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Example//Test//EN", *events, "END:VCALENDAR"])
     path = tmp_path / name
-    path.write_text(body + "\r\n", encoding="utf-8")
+    path.write_bytes((body + "\r\n").encode("utf-8"))  # bytes, so Windows does not turn \r\n into \r\r\n
     return str(path)
 
 

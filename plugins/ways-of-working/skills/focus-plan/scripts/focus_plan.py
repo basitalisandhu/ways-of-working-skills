@@ -377,7 +377,9 @@ def analyse(args) -> dict:
     try:
         analysis_tz: tzinfo = UTC if args.tz.upper() == "UTC" else ZoneInfo(args.tz)
     except (ZoneInfoNotFoundError, ValueError) as exc:
-        raise InputError(f"--tz {args.tz!r} is not a known IANA time zone") from exc
+        raise InputError(
+            f"--tz {args.tz!r} is not a known IANA time zone (on Windows, install the zone data: pip install tzdata)"
+        ) from exc
     work_start = parse_clock(args.work_start, "--work-start")
     work_end = parse_clock(args.work_end, "--work-end")
     if work_end <= work_start:
