@@ -1,0 +1,30 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ways-of-working-skills",
+  "description": "Claude Code skills for ways of working that compute from files you already have: change records from Terraform plans, one action ledger across meeting notes, a security exception register lint, an RFC lifecycle lint and a lightweight decision log.",
+  "owner": {
+    "name": "Muhammad Basit Ali",
+    "url": "https://github.com/basitalisandhu"
+  },
+  "metadata": {
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "ways-of-working",
+      "source": "./plugins/ways-of-working",
+      "description": "Ways-of-working skills, each with a tested standard-library script over local files: change-request-writer, meeting-actions-ledger, risk-exception-register, rfc-lifecycle and decision-log. No network, no rating of people.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Muhammad Basit Ali",
+        "url": "https://github.com/basitalisandhu"
+      },
+      "homepage": "https://github.com/basitalisandhu/ways-of-working-skills",
+      "repository": "https://github.com/basitalisandhu/ways-of-working-skills",
+      "license": "MIT",
+      "keywords": ["ways-of-working", "change-management", "cab", "terraform-plan", "meeting-actions", "risk-exceptions", "risk-acceptance", "rfc", "design-review", "decision-log"],
+      "category": "productivity",
+      "tags": ["change-management", "governance", "team-process", "security"]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ways-of-working-skills"
+version = "0.1.0"
+description = "Ways-of-working records computed from files you already have: change records from Terraform plans, an action ledger across meeting notes, an exception register lint, an RFC lifecycle lint and a decision log."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Muhammad Basit Ali" }]
+keywords = [
+  "claude-code",
+  "claude-code-plugin",
+  "agent-skills",
+  "ways-of-working",
+  "change-management",
+  "terraform-plan",
+  "meeting-actions",
+  "risk-exceptions",
+  "rfc",
+  "decision-log",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Office/Business",
+]
+dependencies = []
+
+[project.scripts]
+ways-of-working = "ways_of_working_skills.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/basitalisandhu/ways-of-working-skills"
+Repository = "https://github.com/basitalisandhu/ways-of-working-skills"
+Issues = "https://github.com/basitalisandhu/ways-of-working-skills/issues"
+Changelog = "https://github.com/basitalisandhu/ways-of-working-skills/blob/main/CHANGELOG.md"
+
+# The wheel carries the dispatcher and the skill scripts only: ways_of_working_skills/cli.py and
+# ways_of_working_skills/skills/<skill>/scripts/*.py. The dispatcher finds the skills next to itself.
+# Adding a skill: add one force-include line for its scripts folder.
+[tool.hatch.build.targets.wheel]
+bypass-selection = true
+
+[tool.hatch.build.targets.wheel.force-include]
+"scripts/cli.py" = "ways_of_working_skills/cli.py"
+"plugins/ways-of-working/skills/change-request-writer/scripts" = "ways_of_working_skills/skills/change-request-writer/scripts"
+"plugins/ways-of-working/skills/meeting-actions-ledger/scripts" = "ways_of_working_skills/skills/meeting-actions-ledger/scripts"
+"plugins/ways-of-working/skills/risk-exception-register/scripts" = "ways_of_working_skills/skills/risk-exception-register/scripts"
+"plugins/ways-of-working/skills/rfc-lifecycle/scripts" = "ways_of_working_skills/skills/rfc-lifecycle/scripts"
+"plugins/ways-of-working/skills/decision-log/scripts" = "ways_of_working_skills/skills/decision-log/scripts"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "scripts/cli.py",
+  "plugins/ways-of-working/**",
+  "tests/**",
+  "README.md",
+  "LICENSE",
+  "CHANGELOG.md",
+  "pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]

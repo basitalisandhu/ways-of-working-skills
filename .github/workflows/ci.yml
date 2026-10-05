@@ -1,0 +1,93 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate structure, skills and house style
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.10"
+      - name: Repository validator
+        run: python3 scripts/validate_plugin.py
+      - name: Every subcommand answers --help through the dispatcher
+        run: |
+          for s in $(python3 -c "import importlib.util as u; s=u.spec_from_file_location('c','scripts/cli.py'); m=u.module_from_spec(s); s.loader.exec_module(m); print(*m.COMMANDS)"); do
+            python3 scripts/cli.py "$s" --help > /dev/null
+          done
+
+  tests:
+    name: Tests and lint
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python3 -m pip install pytest pyyaml ruff
+      - run: ruff check .
+      - run: python3 -m pytest -q
+
+  container-build:
+    name: Build the container image and run it
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the image, print --help, run each subcommand's --help and one sample, and check the user
+        run: |
+          docker build --build-arg VERSION=ci -t ways-of-working-skills:ci .
+          docker run --rm ways-of-working-skills:ci --help > help.txt && grep "^usage: ways-of-working <subcommand>" help.txt
+          for s in change-request meeting-ledger exception-register rfc-lint decision-log; do docker run --rm ways-of-working-skills:ci "$s" --help > /dev/null; done
+          mkdir -p sample && printf -- '- [ ] Platform team: update the restore runbook (due 2026-10-01)\n' > sample/2026-09-22-sync.md
+          set +e
+          docker run --rm -v "$PWD/sample:/work:ro" ways-of-working-skills:ci meeting-ledger /work --as-of 2026-10-05 > ledger.md; test $? -eq 1 || exit 1
+          set -e
+          grep "^## Overdue (1)" ledger.md
+          docker run --rm ways-of-working-skills:ci --version
+          test "$(docker run --rm --entrypoint id ways-of-working-skills:ci -u)" = "1000"
+          test "$(docker run --rm --entrypoint pwd ways-of-working-skills:ci)" = "/work"
+
+  claude-plugin-validate:
+    name: claude plugin validate --strict
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - name: Install the Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Validate the marketplace and the plugin
+        run: |
+          claude plugin validate --strict .
+          claude plugin validate --strict plugins/ways-of-working

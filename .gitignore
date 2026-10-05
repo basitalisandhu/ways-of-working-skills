@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Local inputs and outputs (real plans, notes and registers stay out of the repository; tests build their own inputs)
+plan.json
+plan.out
+*.tfplan
+pr.json
+change-record.md
+agenda.md
+rfc-lint.md
+/ledger/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
