@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-05
+
+### Added
+
+- `vendor-scorecard`: `vendor_scorecard.py` reads a CSV of criteria, weights and 1 to 5 scores per vendor, computes weighted scores and the ranking with exact fractions, moves each weight by `--step` (default 1) up and down to report whether the leader and the full order survive, flags ties for first, leader changes and data problems, and prints a Markdown scorecard with a blank decision line.
+- `working-agreement-check`: `working_agreement_check.py` reads a team's working agreement in Markdown, maps recognised rules (review counts, code owner review, protected branch, required checks, force pushes, deletion, linear history, signed commits, admin enforcement, stale reviews, conversation resolution, CODEOWNERS coverage) to saved branch protection, rulesets, CODEOWNERS and workflow list exports, and reports each as met, not met or not checkable from these exports, listing rules it does not recognise; `--strict` also exits 1 on not checkable.
+- `shift-handover`: `shift_handover.py` reads incident and alert exports (JSON or CSV) and optional notes, groups open incidents by age, flags no update within `--stale-hours`, no owner, noisy alerts, and silences that end within `--horizon-hours` or already ended, and writes a forward-looking handover note.
+- `scripts/cli.py` subcommands `vendor-scorecard`, `working-agreement` and `shift-handover`, with the matching wheel force-include lines, container build check and wheel check.
+
 ## [0.1.0] - 2026-10-05
 
 ### Added
@@ -24,5 +33,6 @@ All notable changes to this project are documented here. The format follows Keep
 - `release.yml`: PyPI trusted publishing of the `ways-of-working-skills` package, off until the repository variable `PYPI_PUBLISH` is `true`.
 - Tasks for new contributors in `docs/good-first-issues.md`.
 
-[Unreleased]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/basitalisandhu/ways-of-working-skills/releases/tag/v0.1.0

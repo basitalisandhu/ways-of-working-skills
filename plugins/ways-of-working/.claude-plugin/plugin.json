@@ -1,8 +1,8 @@
 {
   "name": "ways-of-working",
   "displayName": "Ways of Working",
-  "version": "0.1.0",
-  "description": "Nine ways-of-working skills that compute from files you already have: a CAB-style change record from a Terraform plan or PR export, one action ledger across meeting notes, a security exception register lint, a quarterly risk register refresh against findings exports, an RFC writer with a lifecycle lint, a one-file-per-decision log, a weekly status note from git and gh exports, a private 1:1 ledger, and meeting load and focus blocks from a calendar export. Standard-library scripts, no network, no rating of people.",
+  "version": "0.2.0",
+  "description": "Twelve ways-of-working skills that compute from files you already have: a CAB-style change record from a Terraform plan or PR export, one action ledger across meeting notes, a security exception register lint, a quarterly risk register refresh against findings exports, an RFC writer with a lifecycle lint, a one-file-per-decision log, a weekly status note from git and gh exports, a private 1:1 ledger, meeting load and focus blocks from a calendar export, a weighted vendor scorecard with a sensitivity check, a check of a team's working agreement against GitHub settings exports, and a shift handover note from incident and alert exports. Standard-library scripts, no network, no rating of people.",
   "author": {
     "name": "Muhammad Basit Ali",
     "url": "https://github.com/basitalisandhu"
@@ -27,6 +27,12 @@
     "one-on-one",
     "focus-time",
     "calendar",
-    "risk-register"
+    "risk-register",
+    "vendor-selection",
+    "scorecard",
+    "working-agreement",
+    "branch-protection",
+    "on-call",
+    "handover"
   ]
 }

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ways-of-working-skills"
-version = "0.1.0"
-description = "Ways-of-working records computed from files you already have: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger and focus time from a calendar export."
+version = "0.2.0"
+description = "Ways-of-working records computed from files you already have: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger, focus time from a calendar export, a vendor scorecard with a sensitivity check, a working agreement check against GitHub settings, and a shift handover note from incident and alert exports."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -26,6 +26,9 @@ keywords = [
   "one-on-one",
   "focus-time",
   "risk-register",
+  "vendor-scorecard",
+  "working-agreement",
+  "on-call-handover",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -69,6 +72,9 @@ bypass-selection = true
 "plugins/ways-of-working/skills/one-on-one-ledger/scripts" = "ways_of_working_skills/skills/one-on-one-ledger/scripts"
 "plugins/ways-of-working/skills/focus-plan/scripts" = "ways_of_working_skills/skills/focus-plan/scripts"
 "plugins/ways-of-working/skills/risk-register-refresh/scripts" = "ways_of_working_skills/skills/risk-register-refresh/scripts"
+"plugins/ways-of-working/skills/vendor-scorecard/scripts" = "ways_of_working_skills/skills/vendor-scorecard/scripts"
+"plugins/ways-of-working/skills/working-agreement-check/scripts" = "ways_of_working_skills/skills/working-agreement-check/scripts"
+"plugins/ways-of-working/skills/shift-handover/scripts" = "ways_of_working_skills/skills/shift-handover/scripts"
 
 [tool.hatch.build.targets.sdist]
 include = [
