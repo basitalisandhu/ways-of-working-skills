@@ -3,6 +3,7 @@
 All notable changes to this project are documented here. The format follows Keep a Changelog, and the project uses semantic versioning.
 
 ## [Unreleased]
+- Clarify manual script invocation instructions when skills are copied directly into `.claude/skills/`.
 
 ## [0.2.1] - 2026-10-05
 

@@ -58,7 +58,8 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/meeting-actions-ledger/scripts/meeting_led
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/meeting-actions-ledger/scripts/meeting_ledger.py" notes/ --as-of 2026-10-05 --out ledger/
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/meeting-actions-ledger/scripts/meeting_ledger.py" notes/ --carry 2 --json
 ```
-From a copy install, run `scripts/meeting_ledger.py` from the skill folder.
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/meeting-actions-ledger` with the path to this skill's folder, for example `.claude/skills/meeting-actions-ledger`, and run the command from the repository root.
+
 | Option | Effect |
 |---|---|
 | `folder` | the notes folder |

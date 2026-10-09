@@ -85,7 +85,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle/scripts/rfc_lint.py" rfcs/ -
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle/scripts/rfc_lint.py" rfcs/ --max-review-days 21 --out rfc-lint.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle/scripts/rfc_lint.py" rfcs/ --sections "" --json
 ```
-From a copy install, run `scripts/rfc_lifecycle.py` from the skill folder.
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle` with the path to this skill's folder, for example `.claude/skills/rfc-lifecycle`, and run the command from the repository root.
 
 | Option | Effect |
 |---|---|
@@ -109,7 +109,6 @@ Exit codes: 0 no findings, 1 at least one finding, 2 bad input (folder missing, 
 | `missing-review-start` | status review and neither date is valid |
 | `missing-section` | status review or accepted and an outline heading is absent |
 | `invalid-date`, `malformed-front-matter` | a date that is not `YYYY-MM-DD`; a `---` block never closed |
-
 
 ## Output
 

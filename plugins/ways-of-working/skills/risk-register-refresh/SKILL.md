@@ -78,7 +78,8 @@ Save the register as CSV from the spreadsheet it lives in, and keep last quarter
 4. Record the owners' decisions in the register themselves; do not edit the register on their behalf unless asked for a specific change.
 
 ## Script
-From a copy install, run `scripts/risk_register.py` from the skill folder.
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/risk-register-refresh` with the path to this skill's folder, for example `.claude/skills/risk-register-refresh`, and run the command from the repository root.
+
 | Option | Effect |
 |---|---|
 | `register` | the current register CSV |
@@ -89,7 +90,6 @@ From a copy install, run `scripts/risk_register.py` from the skill folder.
 | `--output PATH` | write the refresh to this file; nothing else is written |
 
 Exit codes: 0 nothing flagged, 1 at least one row needs review, 2 bad input (missing file or columns, invalid JSON, bad date). Added and removed risks are listed but do not set exit code 1 on their own.
-
 
 ## Output
 

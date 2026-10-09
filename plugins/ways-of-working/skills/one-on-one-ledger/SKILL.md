@@ -73,7 +73,8 @@ Line syntax inside a section: `- topic: <text>`; `- [ ] me: <text>` or `- [ ] th
 5. If the user wants a follow-up note for the other person, draft it for them to send themselves. Never send it.
 
 ## Script
-From a copy install, run `scripts/one_on_one_ledger.py` from the skill folder.
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/one-on-one-ledger` with the path to this skill's folder, for example `.claude/skills/one-on-one-ledger`, and run the command from the repository root.
+
 | Option | Effect |
 |---|---|
 | `notes` | the private notes folder |
