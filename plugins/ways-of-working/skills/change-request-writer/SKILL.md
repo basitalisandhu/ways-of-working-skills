@@ -64,6 +64,8 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/change-request-writer/scripts/change_reque
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/change-request-writer/scripts/change_request.py" pr.json --json
 ```
 
+From a copy install, run `scripts/change_request.py` from the skill folder.
+
 | Option | Effect |
 |---|---|
 | `input` | plan JSON or `gh pr view --json` export |

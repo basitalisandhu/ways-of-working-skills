@@ -78,6 +78,7 @@ Save the register as CSV from the spreadsheet it lives in, and keep last quarter
 4. Record the owners' decisions in the register themselves; do not edit the register on their behalf unless asked for a specific change.
 
 ## Script
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/risk-register-refresh` with the path to this skill's folder, for example `.claude/skills/risk-register-refresh`, and run the command from the repository root.
 
 | Option | Effect |
 |---|---|

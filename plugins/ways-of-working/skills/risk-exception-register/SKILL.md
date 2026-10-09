@@ -57,6 +57,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" register.md --window 60 --out agenda.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" exceptions.csv --renewal-limit 1 --json
 ```
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register` with the path to this skill's folder, for example `.claude/skills/risk-exception-register`, and run the command from the repository root.
 
 | Option | Effect |
 |---|---|

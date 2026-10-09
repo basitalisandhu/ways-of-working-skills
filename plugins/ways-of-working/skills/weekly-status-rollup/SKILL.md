@@ -81,6 +81,7 @@ Last week's note: this script's previous output, or any Markdown that cites item
 5. Keep the item lines and links unchanged when editing for tone.
 
 ## Script
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/weekly-status-rollup` with the path to this skill's folder, for example `.claude/skills/weekly-status-rollup`, and run the command from the repository root.
 
 | Option | Effect |
 |---|---|

@@ -53,7 +53,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/vendor-scorecard/scripts/vendor_scorecard.
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/vendor-scorecard/scripts/vendor_scorecard.py" scores.csv --step 0.5 --out scorecard.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/vendor-scorecard/scripts/vendor_scorecard.py" scores.csv --json
 ```
-
+From a copy install, run `scripts/vendor_scorecard.py` from the skill folder.
 | Option | Effect |
 |---|---|
 | `scores` | the CSV file |
