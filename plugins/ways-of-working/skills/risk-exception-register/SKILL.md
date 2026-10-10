@@ -56,6 +56,7 @@ EX-2,legacy-ftp,A.8.20,vendor upload,Head of IT,2026-07-01,2026-10-20,source IP 
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" exceptions.csv --as-of 2026-10-05
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" register.md --window 60 --out agenda.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" exceptions.csv --renewal-limit 1 --json
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_register.py" exceptions.csv --buckets 30,60,90
 ```
 
 | Option | Effect |
@@ -63,11 +64,12 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/risk-exception-register/scripts/exception_
 | `register` | the CSV or Markdown file |
 | `--as-of YYYY-MM-DD` | date expiry is judged against (default today) |
 | `--window N` | days ahead that count as expiring (default 30) |
+| `--buckets 30,60,90` | split "Expiring soon" into one sub-list per bucket of days ahead; the window becomes the largest bucket |
 | `--renewal-limit N` | renewals allowed before a row is flagged (default 2, so a third renewal is flagged) |
 | `--json` | print the computed data as JSON |
 | `--out FILE` | write to this file instead of standard output |
 
-Exit codes: 0 no findings, 1 at least one finding, 2 bad input (file missing or empty, no table, missing required columns, bad `--as-of`).
+Exit codes: 0 no findings, 1 at least one finding, 2 bad input (file missing or empty, no table, missing required columns, bad `--as-of` or `--buckets`).
 
 | Rule | Flags a row when |
 |---|---|

@@ -163,3 +163,39 @@ def test_golden_agenda(tmp_path):
     rc, out, _ = run_main(mod, [reg(tmp_path), *AS_OF])
     assert rc == 1
     assert out == GOLDEN
+
+
+BUCKETS_CSV = """
+    id,system,control,reason,approver,granted,expires,compensating_controls
+    EX-1,wiki,A.5.15,shared login,CISO,2026-01-01,2026-10-15,proxy MFA
+    EX-2,crm,A.8.5,old client,CISO,2026-01-01,2026-11-19,logging
+    EX-3,ftp,A.8.20,vendor upload,CISO,2026-01-01,2026-12-24,IP allow list
+    """
+
+
+def test_buckets_split_expiring_rows_by_days_ahead(tmp_path):
+    path = reg(tmp_path, BUCKETS_CSV)
+    _, rep = run_json(mod, [path, *AS_OF, "--buckets", "30,60,90"])
+    assert rep["buckets"] == [30, 60, 90]
+    assert rep["window_days"] == 90
+    assert {f["id"]: f["bucket"] for f in rep["findings"]} == {"EX-1": 30, "EX-2": 60, "EX-3": 90}
+    rc, out, _ = run_main(mod, [path, *AS_OF, "--buckets", "30,60,90"])
+    assert rc == 1
+    assert "### Within 30 days (1)\n\n- EX-1 (line 2): expires 2026-10-15 (in 10 days)" in out
+    assert "### 31 to 60 days (1)\n\n- EX-2 (line 3): expires 2026-11-19 (in 45 days)" in out
+    assert "### 61 to 90 days (1)\n\n- EX-3 (line 4): expires 2026-12-24 (in 80 days)" in out
+
+
+def test_without_buckets_output_has_no_bucket_fields(tmp_path):
+    _, rep = run_json(mod, [reg(tmp_path, BUCKETS_CSV), *AS_OF, "--window", "90"])
+    assert "buckets" not in rep
+    assert all("bucket" not in f for f in rep["findings"])
+
+
+def test_bad_buckets_exit_2(tmp_path):
+    path = reg(tmp_path, BUCKETS_CSV)
+    for value in ("abc", "30,abc", "60,30", "0,30", "30,30"):
+        rc, _, err = run_main(mod, [path, *AS_OF, "--buckets", value])
+        assert rc == 2 and "--buckets" in err
+    rc, _, err = run_main(mod, [path, *AS_OF, "--buckets", "30,60,90", "--window", "30"])
+    assert rc == 2 and "disagree" in err

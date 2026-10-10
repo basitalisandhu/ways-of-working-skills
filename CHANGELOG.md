@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+### Added
+
+- `risk-exception-register`: `--buckets 30,60,90` splits "Expiring soon" into one sub-list per bucket of days ahead, for quarterly reviews; the window becomes the largest bucket. Without the option the output is unchanged.
+
 ## [0.2.1] - 2026-10-05
 
 ### Changed
