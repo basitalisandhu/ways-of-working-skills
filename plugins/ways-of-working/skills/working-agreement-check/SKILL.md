@@ -55,6 +55,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/working-agreement-check/scripts/working_ag
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/working-agreement-check/scripts/working_agreement_check.py" agreement.md --protection protection.json --rulesets rules.json --workflows workflows.json --strict
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/working-agreement-check/scripts/working_agreement_check.py" agreement.md --codeowners CODEOWNERS --json --out check.json
 ```
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/working-agreement-check` with the path to this skill's folder, for example `.claude/skills/working-agreement-check`, and run the command from the repository root.
 
 | Option | Effect |
 |---|---|

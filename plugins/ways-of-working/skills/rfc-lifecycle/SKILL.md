@@ -85,6 +85,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle/scripts/rfc_lint.py" rfcs/ -
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle/scripts/rfc_lint.py" rfcs/ --max-review-days 21 --out rfc-lint.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle/scripts/rfc_lint.py" rfcs/ --sections "" --json
 ```
+If this skill was copied into `.claude/skills/` without the plugin system, `${CLAUDE_PLUGIN_ROOT}` is empty. Replace `${CLAUDE_PLUGIN_ROOT}/skills/rfc-lifecycle` with the path to this skill's folder, for example `.claude/skills/rfc-lifecycle`, and run the command from the repository root.
 
 | Option | Effect |
 |---|---|

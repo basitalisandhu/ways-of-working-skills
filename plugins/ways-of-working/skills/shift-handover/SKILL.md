@@ -55,7 +55,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/shift-handover/scripts/shift_handover.py" 
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/shift-handover/scripts/shift_handover.py" incidents.csv --stale-hours 2 --out handover.md
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/shift-handover/scripts/shift_handover.py" incidents.json --alerts alerts.json --json
 ```
-
+From a copy install, run `scripts/shift_handover.py` from the skill folder.
 | Option | Effect |
 |---|---|
 | `incidents` | the incident export (JSON or CSV) |

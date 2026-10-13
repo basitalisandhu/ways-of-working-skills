@@ -59,6 +59,8 @@ Settings to agree with the user: the first day of the week to analyse, the numbe
 
 ## Script
 
+From a copy install, run `scripts/focus_plan.py` from the skill folder.
+
 | Option | Effect |
 |---|---|
 | `ics` | the calendar export (.ics) |
