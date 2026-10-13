@@ -9,7 +9,8 @@ Dates are YYYY-MM-DD. For a Markdown file the first table whose header has both 
 
 Rules (each finding cites the row id and its line in the file):
   * expired: expires before --as-of;
-  * expiring: expires on or after --as-of and within --window days (default 30);
+  * expiring: expires on or after --as-of and within --window days (default 30); with --buckets 30,60,90 the window is
+    the largest bucket and the "Expiring soon" section is split into one sub-list per bucket;
   * missing-approver: approver empty;
   * missing-compensating-control: compensating_controls empty, or "none", "n/a", "na" or "-";
   * approver-is-requester: requester given and equal to approver (case-insensitive);
@@ -109,8 +110,29 @@ def parse_date(value: str) -> dt.date | None:
         return None
 
 
+def parse_buckets(value: str) -> list[int]:
+    """Parse "30,60,90" into [30, 60, 90]: whole numbers above 0, in increasing order."""
+    parts = [p.strip() for p in value.split(",")]
+    if not all(p.isdigit() for p in parts):
+        raise InputError(f"--buckets {value!r} must be whole numbers of days separated by commas, e.g. 30,60,90")
+    buckets = [int(p) for p in parts]
+    if buckets[0] == 0 or buckets != sorted(set(buckets)):
+        raise InputError(f"--buckets {value!r} must be above 0 and in increasing order, e.g. 30,60,90")
+    return buckets
+
+
+def bucket_label(buckets: list[int], limit: int) -> str:
+    i = buckets.index(limit)
+    return f"Within {limit} days" if i == 0 else f"{buckets[i - 1] + 1} to {limit} days"
+
+
 def analyse(
-    header: list[str], rows: list[tuple[int, list[str]]], as_of: dt.date, window: int, renewal_limit: int
+    header: list[str],
+    rows: list[tuple[int, list[str]]],
+    as_of: dt.date,
+    window: int,
+    renewal_limit: int,
+    buckets: list[int] | None = None,
 ) -> dict:
     missing = [c for c in REQUIRED if c not in header]
     if missing:
@@ -198,6 +220,8 @@ def analyse(
                 add("expired", r, r["line"], f"expired {exp.isoformat()} ({-days} days before {as_of.isoformat()})")
             elif days <= window:
                 add("expiring", r, r["line"], f"expires {exp.isoformat()} (in {days} days)")
+                if buckets:
+                    findings[-1]["bucket"] = next(b for b in buckets if days <= b)
         if not active:
             continue
         if not r["approver"]:
@@ -220,7 +244,7 @@ def analyse(
         else:
             f["section"] = f["rule"]
     findings.sort(key=lambda f: ([s for s, _ in SECTIONS].index(f["section"]), f["line"], f["rule"]))
-    return {
+    report = {
         "as_of": as_of.isoformat(),
         "window_days": window,
         "renewal_limit": renewal_limit,
@@ -240,6 +264,9 @@ def analyse(
         ],
         "findings": findings,
     }
+    if buckets:
+        report["buckets"] = buckets
+    return report
 
 
 def render(rep: dict, source: str) -> str:
@@ -247,8 +274,9 @@ def render(rep: dict, source: str) -> str:
     open_n = sum(1 for e in rep["exceptions"] if e["status"] == "open")
     out.append(
         f"As of {rep['as_of']}. {rep['rows']} row(s), {open_n} open exception(s), {len(rep['findings'])} "
-        f"finding(s). Expiring means within {rep['window_days']} days; renewals above {rep['renewal_limit']} "
-        "are flagged."
+        f"finding(s). Expiring means within {rep['window_days']} days"
+        + (", grouped by " + ", ".join(f"{b}" for b in rep["buckets"]) + " days" if rep.get("buckets") else "")
+        + f"; renewals above {rep['renewal_limit']} are flagged."
     )
     out.append("")
     n = 0
@@ -259,13 +287,23 @@ def render(rep: dict, source: str) -> str:
         n += 1
         out.append(f"## {n}. {heading} ({len(rows)})")
         out.append("")
-        for f in rows:
-            who = f["id"] or "(no id)"
-            rule = f" [{f['rule']}]" if section == "data" else ""
-            out.append(f"- {who} (line {f['line']}){rule}: {f['detail']}")
-            if section != "data":
-                out.append("  - Decision (renew, close or escalate), owner and date: ____")
-        out.append("")
+        if section == "expiring" and rep.get("buckets"):
+            groups = [(bucket_label(rep["buckets"], b), [f for f in rows if f["bucket"] == b]) for b in rep["buckets"]]
+        else:
+            groups = [(None, rows)]
+        for label, items in groups:
+            if not items:
+                continue
+            if label:
+                out.append(f"### {label} ({len(items)})")
+                out.append("")
+            for f in items:
+                who = f["id"] or "(no id)"
+                rule = f" [{f['rule']}]" if section == "data" else ""
+                out.append(f"- {who} (line {f['line']}){rule}: {f['detail']}")
+                if section != "data":
+                    out.append("  - Decision (renew, close or escalate), owner and date: ____")
+            out.append("")
     if n == 0:
         out.append("No findings. Record the review date and who attended.")
         out.append("")
@@ -281,7 +319,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("register", help="register file: .csv, or Markdown with a pipe table")
     p.add_argument("--as-of", default=None, help="date to judge expiry against, YYYY-MM-DD (default: today)")
-    p.add_argument("--window", type=int, default=30, help="days ahead that count as expiring (default 30)")
+    p.add_argument("--window", type=int, default=None, help="days ahead that count as expiring (default 30)")
+    p.add_argument(
+        "--buckets",
+        default=None,
+        help="split the expiring section by days ahead, e.g. 30,60,90; the window becomes the largest bucket",
+    )
     p.add_argument(
         "--renewal-limit",
         type=int,
@@ -299,11 +342,17 @@ def main(argv: list[str] | None = None) -> int:
         as_of = dt.date.today() if args.as_of is None else parse_date(args.as_of)
         if as_of is None:
             raise InputError(f"--as-of {args.as_of!r} is not a YYYY-MM-DD date")
-        if args.window < 0 or args.renewal_limit < 0:
+        buckets = parse_buckets(args.buckets) if args.buckets is not None else None
+        window = 30 if args.window is None else args.window
+        if buckets:
+            if args.window is not None and args.window != buckets[-1]:
+                raise InputError(f"--window {args.window} and --buckets disagree: the window is the largest bucket")
+            window = buckets[-1]
+        if window < 0 or args.renewal_limit < 0:
             raise InputError("--window and --renewal-limit must be 0 or more")
         path = Path(args.register)
         header, rows = read_rows(path)
-        rep = analyse(header, rows, as_of, args.window, args.renewal_limit)
+        rep = analyse(header, rows, as_of, window, args.renewal_limit, buckets)
     except InputError as exc:
         print(f"exception_register.py: {exc}", file=sys.stderr)
         return 2
