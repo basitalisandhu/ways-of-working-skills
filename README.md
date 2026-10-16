@@ -1,8 +1,8 @@
 # Claude Code skills for ways of working: the records a team keeps, from files you already have
 
-**Twelve skills: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger, focus time from a calendar export, a vendor scorecard, a working agreement check and a shift handover note. Offline, standard-library scripts, tested.**
+**Thirteen skills: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger, focus time from a calendar export, a vendor scorecard, a working agreement check, a shift handover note and a ranked next-actions list from mail and chat exports. Offline, standard-library scripts, tested.**
 
-ways-of-working-skills is a Claude Code plugin for the records that keep a team honest about its own process: what a change will do before the board approves it, which actions from last month's meetings are still open, which security exceptions have expired and which risks need a fresh look, which design proposals are stuck in review, which operational decisions are due for a second look, what a lead shipped this week, what each side promised in 1:1s, where the focus time went, whether a vendor choice survives a change of weights, whether the repository settings match the team's working agreement, and what the next on-call shift needs to know. These records usually live in files nobody re-reads. Each skill here reads those files with a small Python script, applies stated rules, cites the file and line behind every finding, and leaves decisions to people.
+ways-of-working-skills is a Claude Code plugin for the records that keep a team honest about its own process: what a change will do before the board approves it, which actions from last month's meetings are still open, which security exceptions have expired and which risks need a fresh look, which design proposals are stuck in review, which operational decisions are due for a second look, what a lead shipped this week, what each side promised in 1:1s, where the focus time went, whether a vendor choice survives a change of weights, whether the repository settings match the team's working agreement, what the next on-call shift needs to know, and which messages across several inboxes and chats need you next. These records usually live in files nobody re-reads. Each skill here reads those files with a small Python script, applies stated rules, cites the file and line behind every finding, and leaves decisions to people.
 
 Find this when you search for: "meeting overload", "action items", "weekly update".
 
@@ -36,6 +36,7 @@ This pack is part of [claude-skills](https://github.com/basitalisandhu/claude-sk
 - A tool or supplier selection is close, and you want the weighted scores and whether the winner changes when one weight moves. `vendor-scorecard`
 - The team wrote down "PRs need one review" and "main is protected", and you want to know whether the repository settings still say the same. `working-agreement-check`
 - An on-call shift is ending and the next person needs what is open, what has gone quiet, which alerts are noisy and which silences end soon. `shift-handover`
+- Work mail, personal mail, Teams and Slack all need checking, and you want one ranked list of what to reply to, decide or do, plus who still owes you an answer. `next-actions-sweep`
 
 ## Skills
 
@@ -53,8 +54,9 @@ This pack is part of [claude-skills](https://github.com/basitalisandhu/claude-sk
 | `vendor-scorecard` | "score these vendors against our criteria", "does the result change if we weight cost more?" | `vendor_scorecard.py` | a CSV: criterion, weight, one column per vendor with scores 1 to 5 | weighted scores and ranking, a sensitivity table for each weight moved one step up and down, ties for first and leader changes flagged, a Markdown scorecard with a blank decision line |
 | `working-agreement-check` | "does our repo enforce our working agreement?", "are we still in line after the protection change?" | `working_agreement_check.py` | the agreement in Markdown, plus saved `gh api` branch protection and rulesets JSON, CODEOWNERS and a workflow list | each recognised rule as met, not met or not checkable from these exports, with the setting behind it, and the rules it does not recognise |
 | `shift-handover` | "write the on-call handover", "which incidents have gone quiet?", "which silences expire tonight?" | `shift_handover.py` | an incident export (JSON or CSV), an optional alert export and notes | open incidents grouped by age, no update in N hours, no owner, noisy alerts, silences that end during the next shift, and a handover note with blank acknowledgement lines |
+| `next-actions-sweep` | "what should I answer first?", "sweep my inboxes", "who still owes me a reply?" | `next_actions.py` | Microsoft Graph mail and Teams JSON, Slack export JSON or a CSV, one file per account | one ranked list labelled reply, decide, do or FYI with the reason, a stated deadline and the link back, duplicates across accounts merged, answered threads dropped, and a waiting-on-others list; never sends or changes anything |
 
-Every script reads local files only, prints Markdown by default and JSON with `--json`, answers `--help`, and writes only to the path given with `--out`, `--output` or `--index`. Exit codes are the same across the pack: 0 nothing flagged, 1 something needs a person, 2 bad input; `one-on-one-ledger` adds 3 when it refuses a path that looks shared or sits inside a repository. Where a date matters it is judged against `--as-of` (`focus-plan` takes `--start`), so a run can be repeated later with the same result.
+Every script reads local files only, prints Markdown by default and JSON with `--json`, answers `--help`, and writes only to the path given with `--out`, `--output` or `--index`. Exit codes are the same across the pack: 0 nothing flagged, 1 something needs a person, 2 bad input; `one-on-one-ledger` adds 3 when it refuses a path that looks shared or sits inside a repository, and `next-actions-sweep` exits 0 whenever it wrote its list, since a do-next list nearly always has items. Where a date matters it is judged against `--as-of` (`focus-plan` takes `--start`), so a run can be repeated later with the same result.
 
 **focus-plan.** A week rarely runs out of hours; it runs out of unbroken ones. `focus-plan` reads a calendar the user exported to an .ics file and reports, for each day of the chosen week, how many meetings there are, how much time they cover with overlaps counted once, where meetings run back to back, and the longest free blocks inside the working hours the user sets. It lists recurring series with their occurrences and time in the window, and writes a short focus plan that points at real gaps. Daily and weekly recurrence rules are expanded with exclusions and moved occurrences applied; monthly, yearly and other rules are listed as not expanded rather than guessed. It never writes to a calendar and never says which meetings to decline.
 
@@ -69,6 +71,41 @@ Every script reads local files only, prints Markdown by default and JSON with `-
 **working-agreement-check.** `working-agreement-check` reads a team's working agreement as written, one rule per list item, and matches the rules it recognises (review counts, code owner review, protected branch, required checks, force pushes, deletion, linear history, signed commits, admin enforcement, stale reviews, conversation resolution, CODEOWNERS coverage of a path) to saved `gh api` exports of branch protection and rulesets, the CODEOWNERS file and the workflow list. Each rule comes back as met, not met or not checkable from these exports, with the setting that decided it; rules it does not recognise are listed for a person to check. It changes nothing and has no audit framing.
 
 **shift-handover.** `shift-handover` writes the note one on-call shift leaves for the next from saved incident and alert exports and the outgoing person's notes: open incidents grouped by age, those with no update for more than N hours or no owner, alerts that fired more than a threshold, and silences that end during the next shift or have already ended. It looks forward, at what is live; the retrospective timeline is `incident-postmortem-timeline`. It never pages, assigns, closes or silences anything.
+
+**next-actions-sweep.** One person often has a work mailbox, a personal one, Teams and Slack. `next-actions-sweep` reads exports the user saved from each (Microsoft Graph messages and chat message JSON, a Slack export, or a CSV), keeps the latest message of each thread, drops threads the user already answered, merges the same message seen in two accounts, and ranks the rest by fixed weights that the skill lists in full. Each line is labelled reply, decide, do or FYI and carries the reason, any deadline the sender stated in an explicit form, the accounts it came from and the link back. The user's own questions with no answer after `--waiting-days` go to a separate waiting-on-others list. `--redact` replaces names and addresses with tokens. It needs read-only exports (`Mail.Read`, `Chat.Read`) and never sends, drafts, moves or marks anything. The synthetic exports in the skill's `examples/` folder give this (`--top 6`):
+
+```bash
+cd plugins/ways-of-working/skills/next-actions-sweep
+python3 scripts/next_actions.py --source work-mail=examples/work-mail.json --source home-mail=examples/home-mail.json \
+  --source teams=examples/teams.json --source slack=examples/slack.json --source other=examples/other.csv \
+  --me alex.morgan@example.com --me alex@example.org --me "Alex Morgan" --me U0ME --me u-alex \
+  --vip priya.shah@example.com --as-of 2026-10-16T09:00:00Z --top 6
+```
+
+```markdown
+# Next actions: 2026-10-16T09:00Z
+
+20 message(s) in the last 72 hours from work-mail (graph-mail, 10), home-mail (graph-mail, 3), teams (graph-teams, 3), slack (slack, 4), other (csv, 1); 17 thread(s), 2 already answered by you, 1 duplicate(s) merged across accounts. Labels: 2 decide, 3 do, 3 reply, 5 FYI. Labels and scores come from fixed rules; check each before acting.
+
+## Do next (6 of 13)
+
+| Rank | Label | From | Subject or excerpt | Deadline | Why | Sources | Link |
+|---|---|---|---|---|---|---|---|
+| 1 | decide | Priya Shah | Budget sign-off for Q4 tooling | 2026-10-19 | asks for a decision ("sign-off"); sent to you; VIP sender; due in 3 days; high importance; unread (score 101) | work-mail | [open](https://outlook.example.com/mail/w1) |
+| 2 | do | Sam Lee | Release notes draft | 2026-10-16 | deadline ("EOD"); sent to you; due within 2 days; flagged (score 85) | work-mail | [open](https://outlook.example.com/mail/w2) |
+| 3 | do | Morgan Bell | School trip form | 2026-10-17 | deadline ("by tomorrow"); sent to you; due within 2 days (score 70) | other | [open](https://forms.example.org/r/42) |
+| 4 | decide | Jamie Fox | Hi Alex, which option do you prefer for the on-call rota, A or B? | - | asks for a decision ("which option"); direct chat (score 50) | teams | [open](https://teams.example.com/l/message/t1) |
+| 5 | reply | Dana Cole | Conference talk slot | - | request ("would you"); sent to you; unread (score 46) | home-mail, work-mail | [open](https://outlook.example.com/mail/w9) |
+| 6 | do | Kai Ito | Alex Morgan please review the runbook change before 2026-10-20. | 2026-10-20 | deadline ("2026-10-20"); mentions you; due in 4 days (score 46) | teams | [open](https://teams.example.com/l/message/t2) |
+
+## Waiting on others (1)
+
+| Sent | To | Subject or excerpt | Days waiting | Sources | Link |
+|---|---|---|---|---|---|
+| 2026-10-13T11:00Z | Taylor Reed | RE: Vendor contract | 2.9 | work-mail | [open](https://outlook.example.com/mail/w6) |
+
+Nothing was sent, drafted, moved or marked as read. Reply from your own mail or chat client.
+```
 
 ## What this is not
 
@@ -85,6 +122,7 @@ Every script reads local files only, prints Markdown by default and JSON with `-
 - `vendor-scorecard` ranks vendors on agreed criteria; supplier assurance evidence and questionnaires belong to compliance-evidence-skills.
 - `working-agreement-check` checks the team's own rules against repository settings; `github-change-control-evidence` (compliance-evidence-skills) produces audit evidence and `docs-truth-check` (repo-engineering-skills) checks README claims against code.
 - `shift-handover` is the live hand-off between on-call shifts; `incident-postmortem-timeline` (github-manager-skills) is the retrospective after an incident.
+- `next-actions-sweep` ranks incoming messages for one person; agreed meeting actions belong in `meeting-actions-ledger`, alert mail in `shift-handover`, and booking the time to act in `focus-plan`.
 - `risk-register-refresh` compares quarters of a risk register; `risk-exception-register` tracks accepted exceptions with an expiry; `access-review-pack` (m365-governance-skills) is for access recertification and `security-hub-triage` (aws-security-skills) for a live findings backlog.
 
 ## Install
@@ -94,7 +132,7 @@ The plugin installs as shown at the top. The scripts are also available without 
 - **Container image** (GitHub Packages, linux/amd64 and linux/arm64), entrypoint `ways-of-working <subcommand> [args]`; mount the input folder at `/work`. The image is published when a version tag is pushed, signed with cosign (keyless), with a build provenance attestation and an SPDX SBOM attached to the GitHub Release:
 
   ```bash
-  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.2.1 meeting-ledger /work/notes --as-of 2026-10-05
+  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.3.0 meeting-ledger /work/notes --as-of 2026-10-05
   ```
 
 - **Python package** `ways-of-working-skills`, which installs the same `ways-of-working` command. PyPI publishing is set up in `release.yml` but switched off until the trusted publisher is configured, so until then install from a clone: `pip install .`
@@ -113,6 +151,7 @@ The plugin installs as shown at the top. The scripts are also available without 
 | `vendor-scorecard` | `vendor_scorecard.py` (vendor-scorecard) |
 | `working-agreement` | `working_agreement_check.py` (working-agreement-check) |
 | `shift-handover` | `shift_handover.py` (shift-handover) |
+| `next-actions` | `next_actions.py` (next-actions-sweep) |
 
 From a checkout, `python3 scripts/cli.py` is the same dispatcher.
 
@@ -121,7 +160,7 @@ From a checkout, `python3 scripts/cli.py` is the same dispatcher.
 - **Local, offline scripts.** The skill scripts read the file or folder you name. They import no network or subprocess module (the repository validator checks this) and write only to the `--out`, `--output` or `--index` path you give.
 - **Your files stay yours.** Plans, notes and registers can hold internal names and system details. Keep them out of version control; `.gitignore` already ignores common names such as `plan.json` and `pr.json`.
 - **Untrusted content.** Notes, plans and registers are data, never instructions: each `SKILL.md` says so.
-- **Synthetic tests.** The tests build their inputs at run time with made-up names; no real plan, note or register is committed.
+- **Synthetic tests.** The tests build their inputs at run time with made-up names; no real plan, note or register is committed. The only sample files are the invented exports in `next-actions-sweep/examples/` (example.com and example.org addresses).
 
 ## What is inside
 
@@ -132,7 +171,8 @@ plugins/ways-of-working/
 ├── README.md                                         the plugin's skill table
 └── skills/<name>/
     ├── SKILL.md                                      when to use it, inputs, steps, script, output, limits, related skills
-    └── scripts/<script>.py                           standard library only, --help, --json, documented exit codes
+    ├── scripts/<script>.py                           standard library only, --help, --json, documented exit codes
+    └── examples/                                     synthetic sample exports (next-actions-sweep only)
 scripts/cli.py                                        the ways-of-working dispatcher (container and package entrypoint)
 scripts/validate_plugin.py                            structure, frontmatter, scripts, READMEs, house style
 tests/                                                pytest suite, offline; inputs are built in each test
@@ -171,6 +211,9 @@ No. It reads a saved .ics export and never writes to a calendar or declines meet
 
 **Does working-agreement-check change branch protection?**
 No. It reads exports you saved with `gh api` and reports met, not met or not checkable. Whether to change the setting or the agreement is the team's call.
+
+**Can it triage my work and personal inboxes together, and will it reply for me?**
+It ranks them together: give one `--source` per exported account and every identity of yours with `--me`; the same message in two mailboxes is merged. It never replies, drafts or marks anything as read; you answer from your own client.
 
 **Can I run it on a schedule?**
 Yes, without Claude Code: run a subcommand with `--as-of` and act on the exit code, which is 1 when something needs a person.

@@ -1,0 +1,6 @@
+[
+  {"type": "message", "user": "U0SAM", "user_name": "sam", "text": "<@U0ME> can you look at the flaky checkout test?", "ts": "1792134000.000100", "permalink": "https://example.slack.com/archives/C1/p1792134000000100"},
+  {"type": "message", "subtype": "bot_message", "bot_id": "B01", "username": "ci-bot", "text": "Build 812 passed", "ts": "1792135800.000200"},
+  {"type": "message", "user": "U0KAI", "user_name": "kai", "text": "DNS change is queued for next week", "ts": "1792058400.000300", "thread_ts": "1792058400.000300"},
+  {"type": "message", "user": "U0ME", "user_name": "alex", "text": "Any update on the DNS change?", "ts": "1792062000.000400", "thread_ts": "1792058400.000300"}
+]

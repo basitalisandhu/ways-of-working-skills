@@ -145,7 +145,7 @@ def test_limits_section_is_detected():
 
 def test_every_skill_md_in_this_repository_meets_the_description_and_limits_rules():
     skills = sorted(ROOT.glob("plugins/*/skills/*/SKILL.md"))
-    assert len(skills) == 12
+    assert len(skills) == 13
     for path in skills:
         text = path.read_text(encoding="utf-8")
         assert validator.description_problems(text) == [], str(path.relative_to(ROOT))

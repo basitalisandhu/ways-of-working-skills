@@ -3,11 +3,18 @@
 All notable changes to this project are documented here. The format follows Keep a Changelog, and the project uses semantic versioning.
 
 ## [Unreleased]
-- Clarify manual script invocation instructions when skills are copied directly into `.claude/skills/`.
+
+## [0.3.0] - 2026-10-16
 
 ### Added
 
+- `next-actions-sweep`: `next_actions.py` reads saved exports from several accounts (`--source NAME=PATH[:FORMAT]`, repeatable: Microsoft Graph messages JSON, Microsoft Graph Teams chatMessage JSON, Slack export JSON, or a CSV), keeps the latest message per thread, drops threads the user (`--me`, repeatable) already answered, merges duplicates across accounts (same sender and subject within an hour, or the same conversationId), labels each item reply, decide, do or FYI by stated phrase rules, reads deadlines only from explicit forms, ranks by documented weights with deterministic ties, and lists the user's unanswered questions older than `--waiting-days` under "Waiting on others"; excerpts are at most 120 characters, `--redact` tokenises names and addresses other than `--vip`, `--lenient` skips bad records with a count; Markdown or `--format json`; exit 0 when the list is written, 2 on bad input. 23 tests, synthetic examples for two invented accounts plus Teams, Slack and CSV with a golden output.
+- `scripts/cli.py` subcommand `next-actions`, with the matching wheel force-include line, container build check and wheel check.
 - `risk-exception-register`: `--buckets 30,60,90` splits "Expiring soon" into one sub-list per bucket of days ahead, for quarterly reviews; the window becomes the largest bucket. Without the option the output is unchanged.
+
+### Changed
+
+- Clarify manual script invocation instructions when skills are copied directly into `.claude/skills/`.
 
 ## [0.2.1] - 2026-10-05
 
@@ -49,7 +56,8 @@ All notable changes to this project are documented here. The format follows Keep
 - `release.yml`: PyPI trusted publishing of the `ways-of-working-skills` package, off until the repository variable `PYPI_PUBLISH` is `true`.
 - Tasks for new contributors in `docs/good-first-issues.md`.
 
-[Unreleased]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/basitalisandhu/ways-of-working-skills/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/basitalisandhu/ways-of-working-skills/releases/tag/v0.1.0

@@ -1,0 +1,42 @@
+{
+  "value": [
+    {
+      "id": "t1",
+      "messageType": "message",
+      "createdDateTime": "2026-10-16T08:15:00.1234567Z",
+      "chatId": "19:rota-chat",
+      "from": {"user": {"id": "u-jamie", "displayName": "Jamie Fox"}},
+      "body": {"contentType": "html", "content": "<p>Hi Alex, which option do you prefer for the on-call rota, A or B?</p>"},
+      "mentions": [],
+      "webUrl": "https://teams.example.com/l/message/t1"
+    },
+    {
+      "id": "t2",
+      "messageType": "message",
+      "createdDateTime": "2026-10-15T14:00:00Z",
+      "channelIdentity": {"teamId": "team-ops", "channelId": "chan-runbooks"},
+      "from": {"user": {"id": "u-kai", "displayName": "Kai Ito"}},
+      "body": {"contentType": "html", "content": "<p><at id=\"0\">Alex Morgan</at> please review the runbook change before 2026-10-20.</p>"},
+      "mentions": [{"id": 0, "mentionText": "Alex Morgan", "mentioned": {"user": {"id": "u-alex", "displayName": "Alex Morgan"}}}],
+      "webUrl": "https://teams.example.com/l/message/t2"
+    },
+    {
+      "id": "t3",
+      "messageType": "message",
+      "createdDateTime": "2026-10-15T15:00:00Z",
+      "channelIdentity": {"teamId": "team-ops", "channelId": "chan-deploys"},
+      "from": {"user": {"id": "u-kai", "displayName": "Kai Ito"}},
+      "body": {"contentType": "html", "content": "<p>Deploy finished &amp; verified.</p>"},
+      "mentions": [],
+      "webUrl": "https://teams.example.com/l/message/t3"
+    },
+    {
+      "id": "t4",
+      "messageType": "systemEventMessage",
+      "createdDateTime": "2026-10-15T15:05:00Z",
+      "chatId": "19:rota-chat",
+      "from": null,
+      "body": {"content": "<systemEventMessage/>"}
+    }
+  ]
+}
