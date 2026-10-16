@@ -1,0 +1,35 @@
+[
+  {
+    "id": "h1",
+    "subject": "Conference talk slot",
+    "from": {"emailAddress": {"name": "Dana Cole", "address": "dana.cole@example.net"}},
+    "toRecipients": [{"emailAddress": {"address": "alex.morgan@example.com"}}, {"emailAddress": {"address": "alex@example.org"}}],
+    "receivedDateTime": "2026-10-15T12:00:40Z",
+    "isRead": false,
+    "bodyPreview": "Would you like the 2pm or the 4pm slot? Let me know.",
+    "conversationId": "conv-talk-home",
+    "webLink": "https://mail.example.org/h1"
+  },
+  {
+    "id": "h2",
+    "subject": "Saturday",
+    "from": {"emailAddress": {"name": "Riley Quinn", "address": "riley@example.org"}},
+    "toRecipients": [{"emailAddress": {"address": "alex@example.org"}}],
+    "receivedDateTime": "2026-10-15T19:00:00Z",
+    "isRead": false,
+    "bodyPreview": "Are you free for lunch on Saturday?",
+    "conversationId": "conv-lunch",
+    "webLink": "https://mail.example.org/h2"
+  },
+  {
+    "id": "h3",
+    "subject": "Your parcel is on its way",
+    "from": {"emailAddress": {"name": "Shop", "address": "notifications@shop.example.org"}},
+    "toRecipients": [{"emailAddress": {"address": "alex@example.org"}}],
+    "receivedDateTime": "2026-10-16T08:00:00Z",
+    "isRead": false,
+    "bodyPreview": "Track it here: https://shop.example.org/track?id=1",
+    "conversationId": "conv-parcel",
+    "webLink": "https://mail.example.org/h3"
+  }
+]

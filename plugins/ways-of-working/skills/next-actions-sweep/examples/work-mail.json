@@ -1,0 +1,120 @@
+{
+  "value": [
+    {
+      "id": "w1",
+      "subject": "Budget sign-off for Q4 tooling",
+      "from": {"emailAddress": {"name": "Priya Shah", "address": "priya.shah@example.com"}},
+      "toRecipients": [{"emailAddress": {"name": "Alex Morgan", "address": "alex.morgan@example.com"}}],
+      "ccRecipients": [],
+      "receivedDateTime": "2026-10-15T16:00:00Z",
+      "isRead": false,
+      "importance": "high",
+      "flag": {"flagStatus": "notFlagged"},
+      "bodyPreview": "Can you sign off the revised budget? Finance needs it by Monday.",
+      "conversationId": "conv-budget",
+      "webLink": "https://outlook.example.com/mail/w1"
+    },
+    {
+      "id": "w2",
+      "subject": "Release notes draft",
+      "from": {"emailAddress": {"name": "Sam Lee", "address": "sam.lee@example.com"}},
+      "toRecipients": [{"emailAddress": {"name": "Alex Morgan", "address": "alex.morgan@example.com"}}],
+      "receivedDateTime": "2026-10-16T07:30:00Z",
+      "isRead": true,
+      "importance": "normal",
+      "flag": {"flagStatus": "flagged"},
+      "bodyPreview": "Please send me the release notes draft by EOD.",
+      "conversationId": "conv-notes",
+      "webLink": "https://outlook.example.com/mail/w2"
+    },
+    {
+      "id": "w3",
+      "subject": "Office move",
+      "from": {"emailAddress": {"name": "Jordan Kim", "address": "jordan.kim@example.com"}},
+      "toRecipients": [{"emailAddress": {"name": "Team", "address": "team@example.com"}}],
+      "ccRecipients": [{"emailAddress": {"name": "Alex Morgan", "address": "alex.morgan@example.com"}}],
+      "receivedDateTime": "2026-10-15T10:00:00Z",
+      "isRead": true,
+      "bodyPreview": "Can everyone pack their desks by Friday?",
+      "conversationId": "conv-move",
+      "webLink": "https://outlook.example.com/mail/w3"
+    },
+    {
+      "id": "w4",
+      "subject": "Your weekly report is ready",
+      "from": {"emailAddress": {"name": "Reports", "address": "noreply@example.com"}},
+      "toRecipients": [{"emailAddress": {"address": "alex.morgan@example.com"}}],
+      "receivedDateTime": "2026-10-16T05:00:00Z",
+      "isRead": false,
+      "bodyPreview": "Please find your report attached.",
+      "conversationId": "conv-report",
+      "webLink": "https://outlook.example.com/mail/w4"
+    },
+    {
+      "id": "w5",
+      "subject": "Vendor contract",
+      "from": {"emailAddress": {"name": "Taylor Reed", "address": "taylor.reed@example.com"}},
+      "toRecipients": [{"emailAddress": {"address": "alex.morgan@example.com"}}],
+      "receivedDateTime": "2026-10-13T09:30:00Z",
+      "isRead": true,
+      "bodyPreview": "The renewal paperwork is attached.",
+      "conversationId": "conv-vendor",
+      "webLink": "https://outlook.example.com/mail/w5"
+    },
+    {
+      "id": "w6",
+      "subject": "RE: Vendor contract",
+      "from": {"emailAddress": {"name": "Alex Morgan", "address": "alex.morgan@example.com"}},
+      "toRecipients": [{"emailAddress": {"name": "Taylor Reed", "address": "taylor.reed@example.com"}}],
+      "receivedDateTime": "2026-10-13T11:00:00Z",
+      "isRead": true,
+      "bodyPreview": "Thanks. Could you confirm the renewal date?",
+      "conversationId": "conv-vendor",
+      "webLink": "https://outlook.example.com/mail/w6"
+    },
+    {
+      "id": "w7",
+      "subject": "Design review",
+      "from": {"emailAddress": {"name": "Chris Park", "address": "chris.park@example.com"}},
+      "toRecipients": [{"emailAddress": {"address": "alex.morgan@example.com"}}],
+      "receivedDateTime": "2026-10-15T08:00:00Z",
+      "isRead": true,
+      "bodyPreview": "Are you joining the review?",
+      "conversationId": "conv-review",
+      "webLink": "https://outlook.example.com/mail/w7"
+    },
+    {
+      "id": "w8",
+      "subject": "RE: Design review",
+      "from": {"emailAddress": {"name": "Alex Morgan", "address": "alex.morgan@example.com"}},
+      "toRecipients": [{"emailAddress": {"address": "chris.park@example.com"}}],
+      "receivedDateTime": "2026-10-15T09:00:00Z",
+      "isRead": true,
+      "bodyPreview": "Yes, see you there.",
+      "conversationId": "conv-review",
+      "webLink": "https://outlook.example.com/mail/w8"
+    },
+    {
+      "id": "w9",
+      "subject": "Conference talk slot",
+      "from": {"emailAddress": {"name": "Dana Cole", "address": "dana.cole@example.net"}},
+      "toRecipients": [{"emailAddress": {"address": "alex.morgan@example.com"}}, {"emailAddress": {"address": "alex@example.org"}}],
+      "receivedDateTime": "2026-10-15T12:00:00Z",
+      "isRead": false,
+      "bodyPreview": "Would you like the 2pm or the 4pm slot? Let me know.",
+      "conversationId": "conv-talk-work",
+      "webLink": "https://outlook.example.com/mail/w9"
+    },
+    {
+      "id": "w10",
+      "subject": "Old thread",
+      "from": {"emailAddress": {"name": "Sam Lee", "address": "sam.lee@example.com"}},
+      "toRecipients": [{"emailAddress": {"address": "alex.morgan@example.com"}}],
+      "receivedDateTime": "2026-10-10T09:00:00Z",
+      "isRead": false,
+      "bodyPreview": "Can you check this?",
+      "conversationId": "conv-old",
+      "webLink": "https://outlook.example.com/mail/w10"
+    }
+  ]
+}

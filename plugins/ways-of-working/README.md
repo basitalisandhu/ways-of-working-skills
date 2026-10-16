@@ -18,5 +18,6 @@ Find this when you search for: "meeting overload", "action items", "weekly updat
 | `vendor-scorecard` | `skills/vendor-scorecard/scripts/vendor_scorecard.py` | score vendors or tools on weighted criteria from a CSV, check whether the ranking survives each weight moved one step, and write a scorecard with a blank decision line |
 | `working-agreement-check` | `skills/working-agreement-check/scripts/working_agreement_check.py` | check the rules in a team's written working agreement against saved branch protection, rulesets, CODEOWNERS and workflow exports, as met, not met or not checkable |
 | `shift-handover` | `skills/shift-handover/scripts/shift_handover.py` | write an on-call or shift handover from incident and alert exports: open incidents by age, stale and ownerless items, noisy alerts and silences that expire |
+| `next-actions-sweep` | `skills/next-actions-sweep/scripts/next_actions.py` | rank what needs you next across saved mail and chat exports from several accounts (Graph mail and Teams JSON, Slack, CSV): reply, decide, do or FYI with the reason, a stated deadline and the link back, plus a waiting-on-others list; reads files only |
 
 Requirements: Python 3.10 or newer on `PATH` as `python3`. The scripts read local files only: no network access, no third-party packages. No skill rates or ranks people.

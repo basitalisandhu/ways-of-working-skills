@@ -17,7 +17,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 PROG = "ways-of-working"
 HERE = Path(__file__).resolve().parent
@@ -89,6 +89,11 @@ COMMANDS: dict[str, tuple[str, str, str]] = {
         "shift-handover",
         "shift_handover.py",
         "On-call or shift handover note from incident and alert exports: open by age, stale, noisy, silenced",
+    ),
+    "next-actions": (
+        "next-actions-sweep",
+        "next_actions.py",
+        "One ranked do-next list (reply, decide, do, FYI) from saved mail and chat exports across accounts",
     ),
 }
 
