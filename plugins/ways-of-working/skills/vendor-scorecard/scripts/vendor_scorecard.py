@@ -99,9 +99,15 @@ def ranking(scores: dict[str, Fraction]) -> list[list[str]]:
 def analyse(header: list[str], rows: list[tuple[int, list[str]]], step: Fraction) -> dict:
     keys = [key(h) for h in header]
     if "criterion" not in keys or "weight" not in keys:
-        raise InputError("header needs 'criterion' and 'weight' columns")
+        hint = ""
+        if len(header) == 1 and any(sep in header[0] for sep in (";", "\t", "|")):
+            hint = "; the file looks separated by something other than commas, save it as comma-separated CSV"
+        raise InputError(f"header needs 'criterion' and 'weight' columns{hint}")
     ci, wi = keys.index("criterion"), keys.index("weight")
     ni = keys.index("notes") if "notes" in keys else None
+    for i, h in enumerate(header):
+        if not h and any(i < len(cells) and cells[i] for _, cells in rows):
+            raise InputError(f"column {i + 1} has values but no header; name the vendor or delete the column")
     vendor_cols = [(i, h) for i, h in enumerate(header) if i not in (ci, wi, ni) and h]
     if not vendor_cols:
         raise InputError("no vendor columns after criterion and weight")
@@ -152,7 +158,8 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], step: Fraction
             }
         )
     if not criteria:
-        raise InputError("no usable criterion rows")
+        first = f": line {findings[0]['line']}, {findings[0]['detail']}" if findings else ""
+        raise InputError(f"no usable criterion rows ({len(findings)} problem(s){first})")
     base_weights = {c["criterion"]: c["weight"] for c in criteria}
     if not sum(base_weights.values()):
         raise InputError("all weights are 0")
@@ -310,7 +317,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     text = json.dumps(rep, indent=2, sort_keys=True) + "\n" if args.json else render(rep, path.name)
     if args.out:
-        Path(args.out).write_text(text, encoding="utf-8")
+        try:
+            Path(args.out).write_text(text, encoding="utf-8")
+        except OSError as exc:
+            print(f"vendor_scorecard.py: cannot write {args.out}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
     else:
         sys.stdout.write(text)
     return 1 if rep["findings"] else 0

@@ -268,9 +268,17 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     text = json.dumps(rep, indent=2, sort_keys=True) + "\n" if args.json else render(rep)
     if args.index:
-        Path(args.index).write_text(index_md(rep), encoding="utf-8")
+        try:
+            Path(args.index).write_text(index_md(rep), encoding="utf-8")
+        except OSError as exc:
+            print(f"decision_log.py: cannot write {args.index}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
     if args.out:
-        Path(args.out).write_text(text, encoding="utf-8")
+        try:
+            Path(args.out).write_text(text, encoding="utf-8")
+        except OSError as exc:
+            print(f"decision_log.py: cannot write {args.out}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
     else:
         sys.stdout.write(text)
     return 1 if rep["findings"] else 0

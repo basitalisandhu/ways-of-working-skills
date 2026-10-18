@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-18
+
+### Changed
+
+- One exit-code convention for the whole pack, now held by `tests/test_exit_codes.py` for every skill: 0 nothing flagged, 1 something needs a person, 2 bad input (3 only for a path `one-on-one-ledger` refuses). `next-actions-sweep` used to exit 0 whenever it wrote its list; it now exits 1 when the list has a reply, decide or do item or a waiting-on-others entry, and 0 when only FYI items remain. New `--exit-zero` keeps the old behaviour for a scheduled run that treats 1 as a failure. If you call `next_actions.py` from a script, check its exit code handling.
+- Descriptions of `decision-log`, `risk-exception-register` and `risk-register-refresh` checked against the labelled trigger prompts in the hub's research notes: decision-log now catches "record that we decided ..." and both risk skills say they are not for user access reviews.
+- README quick start runs as written from a clone and shows real output.
+
+### Fixed
+
+- An `--out`, `--output` or `--index` path that cannot be written made `change-request-writer`, `decision-log`, `meeting-actions-ledger`, `rfc-lifecycle`, `risk-exception-register`, `shift-handover`, `vendor-scorecard`, `working-agreement-check` and `next-actions-sweep` stop with a traceback and exit 1, which the convention reserves for "needs a person". They now print the reason and exit 2.
+- `working-agreement-check`: a `--protection` or `--rulesets` export that is not UTF-8 exits 2 with a message instead of a traceback.
+- `vendor-scorecard`: a column with scores but no vendor name exits 2 instead of being dropped silently; a semicolon or tab separated file gets a hint; "no usable criterion rows" now names the first problem and its line.
+
 ## [0.3.0] - 2026-10-16
 
 ### Added

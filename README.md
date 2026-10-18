@@ -2,7 +2,7 @@
 
 **Thirteen skills: change requests, action ledgers, exception and risk registers, RFC lint, a decision log, weekly status notes, a private 1:1 ledger, focus time from a calendar export, a vendor scorecard, a working agreement check, a shift handover note and a ranked next-actions list from mail and chat exports. Offline, standard-library scripts, tested.**
 
-ways-of-working-skills is a Claude Code plugin for the records that keep a team honest about its own process: what a change will do before the board approves it, which actions from last month's meetings are still open, which security exceptions have expired and which risks need a fresh look, which design proposals are stuck in review, which operational decisions are due for a second look, what a lead shipped this week, what each side promised in 1:1s, where the focus time went, whether a vendor choice survives a change of weights, whether the repository settings match the team's working agreement, what the next on-call shift needs to know, and which messages across several inboxes and chats need you next. These records usually live in files nobody re-reads. Each skill here reads those files with a small Python script, applies stated rules, cites the file and line behind every finding, and leaves decisions to people.
+ways-of-working-skills is a Claude Code plugin for teams and their leads who keep the records that hold a team to its own process: what a change will do before the board approves it, which actions from last month's meetings are still open, which security exceptions have expired and which risks need a fresh look, which design proposals are stuck in review, which operational decisions are due for a second look, what a lead shipped this week, what each side promised in 1:1s, where the focus time went, whether a vendor choice survives a change of weights, whether the repository settings match the team's working agreement, what the next on-call shift needs to know, and which messages across several inboxes and chats need you next. These records usually live in files nobody re-reads. Each skill here reads those files with a small Python script, applies stated rules, cites the file and line behind every finding, and leaves decisions to people.
 
 Find this when you search for: "meeting overload", "action items", "weekly update".
 
@@ -11,12 +11,26 @@ Find this when you search for: "meeting overload", "action items", "weekly updat
 /plugin install ways-of-working@ways-of-working-skills
 ```
 
-Quickstart: open Claude Code in a folder of meeting notes and ask "which actions from our syncs are overdue?". Or run a script directly from a clone of this repository:
+Quickstart: open Claude Code in a folder of meeting notes and ask "which actions from our syncs are overdue?". Or run a script directly from a clone of this repository, here on the synthetic mail export that ships with `next-actions-sweep`:
 
 ```bash
-python3 scripts/cli.py meeting-ledger path/to/notes --as-of 2026-10-05
-python3 scripts/cli.py change-request plan.json --out change-record.md
+python3 scripts/cli.py next-actions --source work=plugins/ways-of-working/skills/next-actions-sweep/examples/work-mail.json --me alex.morgan@example.com --as-of 2026-10-16T09:00:00Z --top 3
 ```
+
+Real output (exit code 1, because three items need you):
+
+```text
+| Rank | Label | From | Subject or excerpt | Deadline | Why |
+|---|---|---|---|---|---|
+| 1 | do | Sam Lee | Release notes draft | 2026-10-16 | deadline ("EOD"); sent to you; due within 2 days; flagged (score 85) |
+| 2 | decide | Priya Shah | Budget sign-off for Q4 tooling | 2026-10-19 | asks for a decision ("sign-off"); sent to you; due in 3 days; high importance; unread (score 76) |
+| 3 | reply | Dana Cole | Conference talk slot | - | request ("would you"); sent to you; unread (score 46) |
+
+Waiting on others (1): RE: Vendor contract, to Taylor Reed, 2.9 days.
+Nothing was sent, drafted, moved or marked as read.
+```
+
+The Sources and Link columns are left out here for width. Point `--source` at your own exports (see the skill's Inputs section for how to save them).
 
 Questions, bugs and ideas: open an issue on this repository. Security reports: see [SECURITY.md](SECURITY.md).
 
@@ -56,7 +70,7 @@ This pack is part of [claude-skills](https://github.com/basitalisandhu/claude-sk
 | `shift-handover` | "write the on-call handover", "which incidents have gone quiet?", "which silences expire tonight?" | `shift_handover.py` | an incident export (JSON or CSV), an optional alert export and notes | open incidents grouped by age, no update in N hours, no owner, noisy alerts, silences that end during the next shift, and a handover note with blank acknowledgement lines |
 | `next-actions-sweep` | "what should I answer first?", "sweep my inboxes", "who still owes me a reply?" | `next_actions.py` | Microsoft Graph mail and Teams JSON, Slack export JSON or a CSV, one file per account | one ranked list labelled reply, decide, do or FYI with the reason, a stated deadline and the link back, duplicates across accounts merged, answered threads dropped, and a waiting-on-others list; never sends or changes anything |
 
-Every script reads local files only, prints Markdown by default and JSON with `--json`, answers `--help`, and writes only to the path given with `--out`, `--output` or `--index`. Exit codes are the same across the pack: 0 nothing flagged, 1 something needs a person, 2 bad input; `one-on-one-ledger` adds 3 when it refuses a path that looks shared or sits inside a repository, and `next-actions-sweep` exits 0 whenever it wrote its list, since a do-next list nearly always has items. Where a date matters it is judged against `--as-of` (`focus-plan` takes `--start`), so a run can be repeated later with the same result.
+Every script reads local files only, prints Markdown by default and JSON with `--json`, answers `--help`, and writes only to the path given with `--out`, `--output` or `--index`. Exit codes are the same across the pack, and a test holds every script to them: 0 nothing flagged, 1 something needs a person, 2 bad input; `one-on-one-ledger` adds 3 when it refuses a path that looks shared or sits inside a repository. For `next-actions-sweep`, "needs a person" means a reply, decide or do item or a waiting-on-others entry (FYI items alone exit 0); pass `--exit-zero` in a scheduled run that treats 1 as a failure. Where a date matters it is judged against `--as-of` (`focus-plan` takes `--start`), so a run can be repeated later with the same result.
 
 **focus-plan.** A week rarely runs out of hours; it runs out of unbroken ones. `focus-plan` reads a calendar the user exported to an .ics file and reports, for each day of the chosen week, how many meetings there are, how much time they cover with overlaps counted once, where meetings run back to back, and the longest free blocks inside the working hours the user sets. It lists recurring series with their occurrences and time in the window, and writes a short focus plan that points at real gaps. Daily and weekly recurrence rules are expanded with exclusions and moved occurrences applied; monthly, yearly and other rules are listed as not expanded rather than guessed. It never writes to a calendar and never says which meetings to decline.
 
@@ -132,7 +146,7 @@ The plugin installs as shown at the top. The scripts are also available without 
 - **Container image** (GitHub Packages, linux/amd64 and linux/arm64), entrypoint `ways-of-working <subcommand> [args]`; mount the input folder at `/work`. The image is published when a version tag is pushed, signed with cosign (keyless), with a build provenance attestation and an SPDX SBOM attached to the GitHub Release:
 
   ```bash
-  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.3.0 meeting-ledger /work/notes --as-of 2026-10-05
+  docker run --rm -v "$PWD:/work" ghcr.io/basitalisandhu/ways-of-working-skills:0.4.0 meeting-ledger /work/notes --as-of 2026-10-05
   ```
 
 - **Python package** `ways-of-working-skills`, which installs the same `ways-of-working` command. PyPI publishing is set up in `release.yml` but switched off until the trusted publisher is configured, so until then install from a clone: `pip install .`

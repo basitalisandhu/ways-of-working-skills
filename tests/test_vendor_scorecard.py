@@ -138,3 +138,18 @@ def test_golden_markdown_and_out_file(tmp_path):
 def test_help_exits_0():
     rc, out, _ = run_main(mod, ["--help"])
     assert rc == 0 and out.startswith("usage: vendor_scorecard.py")
+
+
+def test_messages_for_semicolons_unnamed_columns_and_no_usable_rows(tmp_path):
+    rc, _, err = run_main(mod, [csv_file(tmp_path, "criterion;weight;Alpha\nSecurity;1;4\n", "semi.csv")])
+    assert rc == 2 and "other than commas" in err
+    rc, _, err = run_main(mod, [csv_file(tmp_path, "criterion,weight,Alpha,,Beta\nSecurity,1,4,2,3\n", "gap.csv")])
+    assert rc == 2 and "column 4 has values but no header" in err
+    rc, _, err = run_main(mod, [csv_file(tmp_path, "criterion,weight,Alpha\nSecurity,1,4,9\n", "wide.csv")])
+    assert rc == 2 and "line 2, expected 3 cells, found 4" in err
+
+
+def test_byte_order_mark_spaced_header_and_trailing_empty_column(tmp_path):
+    text = "﻿Criterion , Weight ,Alpha,Beta,\nSecurity,1,4,3,\n"
+    rc, rep = run_json(mod, [csv_file(tmp_path, text, "bom.csv"), "--json"])
+    assert rc == 0 and rep["vendors"] == ["Alpha", "Beta"]

@@ -281,7 +281,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         text = render(rfcs, as_of, args.max_review_days)
     if args.out:
-        Path(args.out).write_text(text, encoding="utf-8")
+        try:
+            Path(args.out).write_text(text, encoding="utf-8")
+        except OSError as exc:
+            print(f"rfc_lint.py: cannot write {args.out}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
     else:
         sys.stdout.write(text)
     return 1 if any(r["findings"] for r in rfcs) else 0

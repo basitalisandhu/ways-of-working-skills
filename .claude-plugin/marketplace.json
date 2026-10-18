@@ -7,14 +7,14 @@
     "url": "https://github.com/basitalisandhu"
   },
   "metadata": {
-    "version": "0.3.0"
+    "version": "0.4.0"
   },
   "plugins": [
     {
       "name": "ways-of-working",
       "source": "./plugins/ways-of-working",
       "description": "Thirteen ways-of-working skills, each with a tested standard-library script over local files: change-request-writer, meeting-actions-ledger, risk-exception-register, risk-register-refresh, rfc-lifecycle, decision-log, weekly-status-rollup, one-on-one-ledger, focus-plan, vendor-scorecard, working-agreement-check, shift-handover and next-actions-sweep. No network, no rating of people.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "author": {
         "name": "Muhammad Basit Ali",
         "url": "https://github.com/basitalisandhu"

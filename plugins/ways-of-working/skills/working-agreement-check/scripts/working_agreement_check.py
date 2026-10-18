@@ -75,6 +75,10 @@ def load_json(path: str | None, flag: str):
         raise InputError(f"{flag} {path}: file not found")
     try:
         return json.loads(p.read_text(encoding="utf-8-sig"))
+    except UnicodeDecodeError as exc:
+        raise InputError(f"{flag} {path}: not UTF-8 text") from exc
+    except OSError as exc:
+        raise InputError(f"{flag} {path}: cannot read ({exc.strerror or exc})") from exc
     except json.JSONDecodeError as exc:
         raise InputError(f"{flag} {path}: not valid JSON ({exc.msg} at line {exc.lineno})") from exc
 
@@ -555,7 +559,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     text = json.dumps(rep, indent=2, sort_keys=True) + "\n" if args.json else render(rep, path.name)
     if args.out:
-        Path(args.out).write_text(text, encoding="utf-8")
+        try:
+            Path(args.out).write_text(text, encoding="utf-8")
+        except OSError as exc:
+            print(f"working_agreement_check.py: cannot write {args.out}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
     else:
         sys.stdout.write(text)
     return 1 if rep["needs_person"] else 0

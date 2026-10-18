@@ -41,7 +41,7 @@ def sweep(tmp_path, sources: dict[str, object], *extra: str) -> tuple[int, dict,
         write_files(tmp_path, {fname: text})
         args += ["--source", f"{name}={tmp_path / fname}"]
     rc, out, err = run_main(mod, [*args, *ME, "--as-of", AS_OF, "--json", *extra])
-    return rc, (json.loads(out) if rc == 0 else {}), err
+    return rc, (json.loads(out) if rc in (0, 1) else {}), err
 
 
 def labels(rep: dict) -> dict[str, str]:
@@ -60,7 +60,7 @@ def test_each_label_from_mail(tmp_path):
         mail(7, "Other", "Can you help?", "2026-10-15T13:00:00Z", to=("someone@example.com",)),
     ]
     rc, rep, _ = sweep(tmp_path, {"work": {"value": msgs}})
-    assert rc == 0
+    assert rc == 1
     assert labels(rep) == {
         "Budget": "decide",
         "Notes": "do",
@@ -87,7 +87,7 @@ def test_waiting_on_others_and_answered_threads(tmp_path):
         mail(5, "Fresh", "Any news?", "2026-10-15T10:00:00Z", sender=me, to=("kai@example.com",)),
     ]
     rc, rep, _ = sweep(tmp_path, {"work": msgs})
-    assert rc == 0
+    assert rc == 1
     assert rep["items"] == []
     assert [(w["subject"], w["to"], w["days_waiting"]) for w in rep["waiting"]] == [
         ("RE: Vendor", ["taylor@example.com"], 2.9)
@@ -107,7 +107,7 @@ def test_duplicates_across_accounts_are_merged_with_every_source(tmp_path):
     ]
     work.append(mail(4, "Shared thread", "Please check.", "2026-10-15T13:00:00Z", conv="same"))
     rc, rep, _ = sweep(tmp_path, {"work": work, "home": home})
-    assert rc == 0
+    assert rc == 1
     assert [(i["subject"], i["sources"]) for i in rep["items"]] == [
         ("Talk slot", ["home", "work"]),
         ("Shared thread", ["home", "work"]),
@@ -146,7 +146,7 @@ def test_scoring_weights_order_and_top(tmp_path):
              importance="high", flag={"flagStatus": "flagged"}, isRead=False),
     ]
     rc, rep, _ = sweep(tmp_path, {"work": msgs}, "--vip", "priya@example.com")
-    assert rc == 0
+    assert rc == 1
     scores = {i["subject"]: i["score"] for i in rep["items"]}
     # reply 10 + to you 30 + age (24h and 25h -> 2), and the VIP adds 25 + 10 + 15 + 5
     assert scores == {"Boss": 95, "Same score older": 42, "Plain": 42}
@@ -174,7 +174,7 @@ def test_teams_html_mentions_chats_and_system_events(tmp_path):
         ]
     }
     rc, rep, _ = sweep(tmp_path, {"teams": teams})
-    assert rc == 0
+    assert rc == 1
     assert rep["sources"][0]["format"] == "graph-teams" and rep["sources"][0]["messages"] == 3
     got = {i["excerpt"]: (i["label"], i["why"]) for i in rep["items"]}
     assert got["Which option & when?"][0] == "decide" and "direct chat" in got["Which option & when?"][1]
@@ -189,7 +189,7 @@ def test_slack_mentions_bots_and_dm_format(tmp_path):
         {"user": "U0KAI", "user_name": "kai", "text": "lunch?", "ts": "1792136000.000300"},
     ]
     rc, rep, _ = sweep(tmp_path, {"slack": slack})
-    assert rc == 0
+    assert rc == 1
     assert {i["excerpt"]: i["label"] for i in rep["items"]} == {
         "<@U0ME> can you look?": "reply",
         "Build passed": "fyi",
@@ -211,7 +211,7 @@ def test_csv_source_column_and_excerpt_limit(tmp_path):
         f"school,office@example.org,alex@example.org;other@example.org,,,{long_text},2026-10-16T07:00:00Z,,\n"
     )
     rc, rep, _ = sweep(tmp_path, {"other": csv_text})
-    assert rc == 0
+    assert rc == 1
     form = next(i for i in rep["items"] if i["subject"] == "Form")
     assert (form["label"], form["deadline"], form["sources"], form["from"]) == ("do", "2026-10-17", ["other"],
                                                                                 "Morgan Bell")
@@ -226,7 +226,7 @@ def test_redact_tokenises_people_but_not_vips_or_me(tmp_path):
         mail(2, "Budget", "Please approve.", "2026-10-16T07:00:00Z", sender=("Priya Shah", "priya@example.com")),
     ]
     rc, rep, _ = sweep(tmp_path, {"work": msgs}, "--redact", "--vip", "priya@example.com")
-    assert rc == 0 and rep["redacted"] is True
+    assert rc == 1 and rep["redacted"] is True
     text = json.dumps(rep["items"])
     assert "Dana" not in text and "dana@example.net" not in text
     assert "Priya Shah" in text
@@ -241,7 +241,7 @@ def test_window_excludes_old_and_future_messages(tmp_path):
         mail(3, "Now", "Can you check?", "2026-10-16T08:59:00Z"),
     ]
     rc, rep, _ = sweep(tmp_path, {"work": msgs})
-    assert rc == 0 and [i["subject"] for i in rep["items"]] == ["Now"]
+    assert rc == 1 and [i["subject"] for i in rep["items"]] == ["Now"]
     assert rep["counts"]["outside_window"] == 2
     _, rep, _ = sweep(tmp_path, {"work": msgs}, "--since-hours", "200")
     assert [i["subject"] for i in rep["items"]] == ["Old", "Now"]
@@ -281,12 +281,12 @@ def test_bad_input_exits_2_with_source_and_index(tmp_path):
 def test_lenient_skips_bad_records_and_reports_the_count(tmp_path):
     msgs = [mail(1, "A", "Can you?", "2026-10-16T08:00:00Z"), {"id": "x", "receivedDateTime": AS_OF}, "junk"]
     rc, rep, _ = sweep(tmp_path, {"work": msgs}, "--lenient")
-    assert rc == 0
+    assert rc == 1
     assert rep["counts"]["skipped"] == 2 and [i["subject"] for i in rep["items"]] == ["A"]
     rc, out, _ = run_main(
         mod, ["--source", f"work={tmp_path / 'work.json'}", *ME, "--as-of", AS_OF, "--lenient"]
     )
-    assert rc == 0 and "2 record(s) skipped as malformed (--lenient)." in out
+    assert rc == 1 and "2 record(s) skipped as malformed (--lenient)." in out
 
 
 def test_empty_list_gives_an_empty_report(tmp_path):
@@ -305,15 +305,31 @@ def test_golden_markdown_from_the_shipped_examples(tmp_path):
         "--me", "U0ME", "--me", "u-alex", "--vip", "priya.shah@example.com", "--as-of", AS_OF,
     ]  # fmt: skip
     rc, out, err = run_main(mod, args)
-    assert rc == 0, err
+    assert rc == 1, err
     assert out == (EXAMPLES / "expected.md").read_text(encoding="utf-8")
     out_file = tmp_path / "sweep.md"
-    assert run_main(mod, [*args, "--out", str(out_file)])[0] == 0
+    assert run_main(mod, [*args, "--out", str(out_file)])[0] == 1
     assert out_file.read_text(encoding="utf-8") == out
     rc, out, _ = run_main(mod, [*args, "--format", "json"])
-    assert rc == 0 and json.loads(out)["counts"]["label_decide"] == 2
+    assert rc == 1 and json.loads(out)["counts"]["label_decide"] == 2
 
 
 def test_help_exits_0():
     rc, out, _ = run_main(mod, ["--help"])
     assert rc == 0 and out.startswith("usage: next_actions.py") and "Exit codes" in out
+
+
+def test_exit_code_follows_the_pack_convention(tmp_path):
+    """0 nothing needs you, 1 an item needs you, --exit-zero for scheduled runs, 2 on an unwritable --out."""
+    fyi = [mail(1, "Status", "All green today.", "2026-10-16T08:00:00Z"),
+           mail(2, "Report", "Please read", "2026-10-16T07:00:00Z", sender=("Reports", "no-reply@example.com"))]
+    rc, rep, _ = sweep(tmp_path, {"work": fyi})
+    assert rc == 0 and rep["items"] and {i["label"] for i in rep["items"]} == {"fyi"}
+    ask = [*fyi, mail(3, "Budget", "Can you approve the budget?", "2026-10-16T08:30:00Z")]
+    rc, rep, _ = sweep(tmp_path, {"work": ask})
+    assert rc == 1 and rep["counts"]["label_decide"] == 1
+    rc, rep, _ = sweep(tmp_path, {"work": ask}, "--exit-zero")
+    assert rc == 0 and rep["counts"]["label_decide"] == 1
+    rc, _, err = run_main(mod, ["--source", f"work={tmp_path / 'work.json'}", *ME, "--as-of", AS_OF,
+                                "--out", str(tmp_path / "missing" / "sweep.md")])
+    assert rc == 2 and "cannot write" in err
