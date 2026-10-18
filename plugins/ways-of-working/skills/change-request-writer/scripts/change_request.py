@@ -400,7 +400,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         text = render(rep, args.title, args.change_id, args.window, path.name)
     if args.out:
-        Path(args.out).write_text(text, encoding="utf-8")
+        try:
+            Path(args.out).write_text(text, encoding="utf-8")
+        except OSError as exc:
+            print(f"change_request.py: cannot write {args.out}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
     else:
         sys.stdout.write(text)
     return 1 if rep["needs_reviewer"] else 0

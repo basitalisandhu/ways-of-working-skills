@@ -290,9 +290,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"meeting_ledger.py: {b['file']}:{b['line']}: {b['problem']}", file=sys.stderr)
     if args.out:
         out = Path(args.out)
-        out.mkdir(parents=True, exist_ok=True)
-        (out / "ledger.md").write_text(md, encoding="utf-8")
-        (out / "ledger.json").write_text(js, encoding="utf-8")
+        try:
+            out.mkdir(parents=True, exist_ok=True)
+            (out / "ledger.md").write_text(md, encoding="utf-8")
+            (out / "ledger.json").write_text(js, encoding="utf-8")
+        except OSError as exc:
+            print(f"meeting_ledger.py: cannot write to {args.out}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
         print(f"wrote {out / 'ledger.md'} and {out / 'ledger.json'}")
     else:
         sys.stdout.write(js if args.json else md)

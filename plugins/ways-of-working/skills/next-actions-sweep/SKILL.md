@@ -74,8 +74,9 @@ From a copy install, run `scripts/next_actions.py` from the skill folder. The `e
 | `--lenient` | skip malformed records and report the count instead of exiting 2 |
 | `--format markdown\|json`, `--json` | output format |
 | `--out FILE` | write to this file instead of standard output |
+| `--exit-zero` | exit 0 whenever the list was written, even when items need you (for scheduled runs) |
 
-Exit codes: 0 the list was written (also when it has items, since a do-next list always has some), 2 bad input (file missing, empty or unreadable, unknown format, malformed JSON, a record missing a required field, reported with source and index; bad option). This differs from the rest of the pack, where 1 means something was flagged.
+Exit codes, the same as the rest of the pack: 0 nothing needs you (only FYI items, or none, and nothing waiting on others), 1 at least one reply, decide or do item or a waiting-on-others entry, 2 bad input (file missing, empty or unreadable, unknown format, malformed JSON, a record missing a required field, reported with source and index; bad option; an `--out` path that cannot be written). The list is written in both the 0 and 1 cases. A scheduled run that treats any non-zero exit as a failure passes `--exit-zero`, which returns 0 whenever the list was written.
 
 Rules, applied in this order:
 

@@ -45,9 +45,11 @@ the user) with stable tokens such as P1. It reads files only: it never sends, dr
 Output: Markdown (ranked table: rank, label, from, subject or excerpt, deadline, why, sources, link; then waiting on
 others) on standard output or --out FILE; --format json (or --json) prints the computed data.
 
-Exit codes: 0 the list was written (also when it has items), 2 bad input (file missing or unreadable, unknown
-format, malformed JSON, missing required fields reported with source and index, bad option). --lenient skips bad
-records and reports how many were skipped instead of exiting 2.
+Exit codes, the same as the rest of the pack: 0 nothing needs you (no reply, decide or do item and nothing waiting on
+others; FYI items alone do not count), 1 at least one item needs you, 2 bad input (file missing or unreadable,
+unknown format, malformed JSON, missing required fields reported with source and index, bad option). The list is
+written in both the 0 and 1 cases. --exit-zero returns 0 whenever the list was written, for a scheduled run that
+treats 1 as a failure. --lenient skips bad records and reports how many were skipped instead of exiting 2.
 """
 
 from __future__ import annotations
@@ -806,7 +808,8 @@ def build_parser() -> argparse.ArgumentParser:
         "decide, do or FYI, with the reason, any stated deadline, the link back and a waiting-on-others list. "
         "Reads files only; never sends or changes anything.",
         epilog="Formats: graph-mail, graph-teams, slack, slack-dm, csv (detected unless given as NAME=PATH:FORMAT). "
-        "Exit codes: 0 the list was written (also when it has items), 2 bad input.",
+        "Exit codes: 0 nothing needs you, 1 at least one reply, decide, do or waiting item, 2 bad input "
+        "(--exit-zero: 0 whenever the list was written).",
     )
     p.add_argument("--source", action="append", required=True, metavar="NAME=PATH[:FORMAT]",
                    help="an export to read, named for the account (repeatable)")
@@ -823,6 +826,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--format", choices=("markdown", "json"), default="markdown", help="output format")
     p.add_argument("--json", action="store_true", help="same as --format json")
     p.add_argument("--out", default=None, help="write the output to this file instead of standard output")
+    p.add_argument("--exit-zero", action="store_true",
+                   help="exit 0 whenever the list was written, even when items need you (for scheduled runs)")
     return p
 
 
@@ -865,10 +870,15 @@ def main(argv: list[str] | None = None) -> int:
     as_json = args.json or args.format == "json"
     text = json.dumps(data, indent=2, sort_keys=True) + "\n" if as_json else render(data)
     if args.out:
-        Path(args.out).write_text(text, encoding="utf-8")
+        try:
+            Path(args.out).write_text(text, encoding="utf-8")
+        except OSError as exc:
+            print(f"next_actions.py: cannot write {args.out}: {exc.strerror or exc}", file=sys.stderr)
+            return 2
     else:
         sys.stdout.write(text)
-    return 0
+    needs_you = bool(rep["waiting"]) or any(it["label"] != "fyi" for it in rep["items"])
+    return 1 if needs_you and not args.exit_zero else 0
 
 
 if __name__ == "__main__":
