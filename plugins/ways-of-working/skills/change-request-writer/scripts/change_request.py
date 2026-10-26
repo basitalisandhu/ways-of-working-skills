@@ -21,6 +21,10 @@ Rules:
     google_compute_network*, google_compute_subnetwork*, google_compute_route*). For a PR export the same classes are
     matched against file paths in the order s3-policy, iam, security-group, kms, network (words such as
     bucket_policy, iam, policy, security_group, firewall, kms, vpc, subnet, route, network) and marked "path match".
+  * stateful: a destroyed or replaced resource whose type holds data (STATEFUL_TYPES: databases, volumes, file
+    systems, tables, buckets, caches, queues and streams on AWS, Azure and Google Cloud) gets a "stateful" note in
+    the Rollback section, because re-applying the old configuration creates it empty. Information only: the note
+    does not change the exit code; the destroy or replace already makes the tier high.
   * risk tier: high when any needs-reviewer item, destroy or replace exists; medium when the plan has in-place changes
     only; low when it only adds; none when nothing changes. A PR export is tiered high when any path matches, else
     "not tiered" (no plan).
@@ -109,6 +113,27 @@ PATH_CLASSES: list[tuple[str, re.Pattern[str]]] = [
     ),
 ]
 
+# Resource types that hold data: destroying or replacing one loses that data unless it is restored separately.
+STATEFUL_TYPES: frozenset[str] = frozenset(
+    {
+        # AWS
+        "aws_db_instance", "aws_rds_cluster", "aws_docdb_cluster", "aws_neptune_cluster", "aws_redshift_cluster",
+        "aws_dynamodb_table", "aws_ebs_volume", "aws_efs_file_system", "aws_fsx_lustre_file_system",
+        "aws_fsx_windows_file_system", "aws_fsx_ontap_file_system", "aws_fsx_openzfs_file_system", "aws_s3_bucket",
+        "aws_elasticache_cluster", "aws_elasticache_replication_group", "aws_memorydb_cluster",
+        "aws_opensearch_domain", "aws_elasticsearch_domain", "aws_kinesis_stream", "aws_msk_cluster",
+        "aws_sqs_queue", "aws_secretsmanager_secret", "aws_kms_key",
+        # Azure
+        "azurerm_storage_account", "azurerm_managed_disk", "azurerm_mssql_database",
+        "azurerm_postgresql_flexible_server", "azurerm_mysql_flexible_server", "azurerm_cosmosdb_account",
+        "azurerm_redis_cache", "azurerm_key_vault",
+        # Google Cloud
+        "google_sql_database_instance", "google_storage_bucket", "google_compute_disk", "google_bigquery_dataset",
+        "google_bigquery_table", "google_spanner_instance", "google_spanner_database", "google_bigtable_instance",
+        "google_filestore_instance", "google_redis_instance", "google_kms_crypto_key",
+    }
+)
+
 ACTION_KIND = {
     ("create",): "add",
     ("update",): "change",
@@ -178,7 +203,8 @@ def analyse_plan(data: dict) -> dict:
             continue
         actions = (rc.get("change") or {}).get("actions") if isinstance(rc.get("change"), dict) else None
         address, rtype = rc.get("address"), rc.get("type")
-        if not isinstance(actions, list) or not actions or not isinstance(address, str) or not isinstance(rtype, str):
+        if (not isinstance(actions, list) or not actions or not all(isinstance(a, str) for a in actions)
+                or not isinstance(address, str) or not isinstance(rtype, str)):
             raise InputError(f"resource_changes[{i}]: needs address, type and change.actions")
         kind = ACTION_KIND.get(tuple(actions))
         if kind is None:
@@ -187,7 +213,8 @@ def analyse_plan(data: dict) -> dict:
             counts["unchanged"] += 1
             continue
         counts[kind] += 1
-        resources.append({"address": address, "type": rtype, "action": kind, "class": classify_type(rtype)})
+        resources.append({"address": address, "type": rtype, "action": kind, "class": classify_type(rtype),
+                          "stateful": rtype in STATEFUL_TYPES})
     resources.sort(key=lambda r: (r["type"], r["address"]))
     by_type: dict[str, dict[str, int]] = {}
     for r in resources:
@@ -210,6 +237,7 @@ def analyse_plan(data: dict) -> dict:
         "needs_reviewer": [
             {"item": r["address"], "class": r["class"], "action": r["action"], "basis": "type"} for r in needs
         ],
+        "stateful_lost": [r["address"] for r in resources if r["stateful"] and r["action"] in ("destroy", "replace")],
         "risk_tier": tier,
     }
 
@@ -339,7 +367,17 @@ def render(rep: dict, title: str, change_id: str | None, window: str | None, inp
         )
         out.append("")
         for r in gone:
-            out.append(f"- `{r['address']}` ({r['action']})")
+            note = ", stateful" if r.get("stateful") else ""
+            out.append(f"- `{r['address']}` ({r['action']}{note})")
+    stateful = [r for r in gone if r.get("stateful")]
+    if stateful:
+        out.append("")
+        out.append(
+            f"**Stateful ({len(stateful)}):** the items marked stateful hold data (a database, volume, file system, "
+            "table, bucket, cache, queue, stream, secret or key), and the new resource starts without it. Confirm a "
+            "restore point (snapshot, backup or export) for each before apply, and how long a restore takes, "
+            "before choosing the window."
+        )
     out.append("")
     out.append("## Verification")
     out.append("")

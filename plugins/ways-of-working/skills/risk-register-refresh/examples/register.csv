@@ -1,0 +1,4 @@
+id,title,owner,likelihood,impact,treatment,review_date,status,finding_refs
+R-01,Public storage buckets,Platform lead,Medium,High,Mitigate,2026-12-01,Open,S3.1;S3.8
+R-02,Root account use,Security lead,Low,High,Mitigate,2026-09-01,Open,IAM.6
+R-03,Unencrypted backups,,Medium,Medium,Mitigate,2026-11-15,Open,

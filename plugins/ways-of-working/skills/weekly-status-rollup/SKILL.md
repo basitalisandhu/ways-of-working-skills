@@ -1,6 +1,6 @@
 ---
 name: weekly-status-rollup
-description: "Write one lead's weekly update from saved git log text, gh pr and issue list JSON and last week's note: shipped, in review, in progress, blocked and carried over with weeks carried, plus Decisions needed and Risks left for the author, never invented; a daily mode gives a standup version. Use when asked to \"write my weekly status\" or what keeps carrying over. Not for team sprint metrics (iteration-report), the review queue (pr-queue-digest), ranking people by output, or repositories you cannot export."
+description: "Write one lead's weekly update from saved git log text, gh pr and issue list JSON and last week's note: shipped, in review, in progress, blocked and carried over with weeks carried, plus Decisions needed and Risks left for the author, never invented; a daily mode gives a standup update from yesterday's commits. Use when asked to \"write my weekly status\" or what keeps carrying over. Not for team sprint metrics (iteration-report), the review queue (pr-queue-digest), ranking people by output, or repositories you cannot export."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. The export step needs git and the gh CLI, logged in with read access to the repositories.
 metadata:

@@ -1,0 +1,17 @@
+[
+ {
+  "number": 20,
+  "title": "Login page times out",
+  "url": "https://github.com/OWNER/shop/issues/20",
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "closedAt": "2026-09-29T12:00:00Z",
+  "updatedAt": "2026-09-29T12:00:00Z",
+  "labels": [],
+  "assignees": [
+   {
+    "login": "example-dev"
+   }
+  ]
+ }
+]

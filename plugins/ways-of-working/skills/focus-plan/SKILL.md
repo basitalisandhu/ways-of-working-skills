@@ -1,6 +1,6 @@
 ---
 name: focus-plan
-description: "Find focus time in a meeting-heavy week from a saved .ics calendar export (Outlook, Google or Apple): meetings and hours per day, back-to-back runs, the longest free blocks inside working hours, recurring series with counts, and a plain focus plan; recurring rules it cannot expand are listed, never guessed. Use when asked \"where can I find focus time this week?\" or about meeting overload. Not for changing a calendar, reading mail or meeting content, or deciding which meetings to decline."
+description: "Find focus time in a meeting-heavy week from a saved .ics calendar export (Outlook, Google Calendar or Apple): meetings and hours per day, back-to-back runs, the longest free blocks inside working hours for deep work, recurring series with counts, and a plain focus plan; recurring rules it cannot expand are listed, never guessed. Use when asked \"where can I find focus time this week?\" or about meeting overload. Not for changing a calendar, reading mail or meeting content, or deciding which meetings to decline."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. The export step is done by the user in their calendar app.
 metadata:

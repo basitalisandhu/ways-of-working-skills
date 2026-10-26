@@ -149,8 +149,8 @@ def excerpt(text: str) -> str:
     return text if len(text) <= EXCERPT_MAX else text[: EXCERPT_MAX - 3].rstrip() + "..."
 
 
-def strip_html(text: str) -> str:
-    return clean(html.unescape(TAG_RE.sub(" ", text or "")))
+def strip_html(text: object) -> str:
+    return clean(html.unescape(TAG_RE.sub(" ", text if isinstance(text, str) else "")))
 
 
 def norm_subject(subject: str) -> str:
@@ -276,7 +276,8 @@ def read_graph_teams(records: list, source: str) -> tuple[list[dict], list[str]]
             else:
                 thread = "chat:" + (clean(rec.get("chatId")) or f"{source}/{msg_id}")
             mentions = []
-            for m in rec.get("mentions") or []:
+            raw_mentions = rec.get("mentions")
+            for m in raw_mentions if isinstance(raw_mentions, list) else []:
                 u = get(m, "mentioned", "user")
                 if isinstance(u, dict):
                     mentions.append(person(u.get("id"), u.get("displayName")))
@@ -344,6 +345,9 @@ def read_slack(records: list, source: str, dm: bool) -> tuple[list[dict], list[s
 
 
 def read_csv(text: str, source: str) -> tuple[list[dict], list[str]]:
+    if "\x00" in text:  # Python 3.10's csv module stops on a NUL; 3.11 reads it. Same answer on both.
+        line = text[: text.index("\x00")].count("\n") + 1
+        raise InputError(f"{source}: line {line} holds a NUL character; save it as plain-text CSV")
     rows = list(csv.reader(io.StringIO(text)))
     rows = [r for r in rows if any(c.strip() for c in r)]
     if not rows:
@@ -611,24 +615,30 @@ def sweep(messages: list[dict], me: Me, as_of: dt.datetime, since_hours: float, 
         items.append({"msg": latest, "sources": sources, **classify(latest, me, as_of)})
     # merge duplicates across accounts: same sender, same subject, within an hour
     items.sort(key=lambda it: (it["msg"]["time"], it["msg"]["source"], it["msg"]["id"]))
+    # Only entries with the same normalised subject can be twins, so look them up by subject instead of scanning
+    # every kept entry for each message; positions are kept in insertion order, so the first twin found is the same.
     merged: list[dict] = []
+    by_subject: dict[str, list[int]] = {}
     duplicates = 0
     for it in items:
         m = it["msg"]
-        twin = next(
-            (
-                o
-                for o in merged
-                if m["subject"]
-                and same_person(o["msg"]["sender"], m["sender"])
-                and norm_subject(o["msg"]["subject"]) == norm_subject(m["subject"])
-                and abs((o["msg"]["time"] - m["time"]).total_seconds()) <= 3600
-            ),
-            None,
-        )
-        if twin is None:
+        subject = norm_subject(m["subject"])
+        at = None
+        if m["subject"]:
+            at = next(
+                (
+                    i
+                    for i in by_subject.get(subject, ())
+                    if same_person(merged[i]["msg"]["sender"], m["sender"])
+                    and abs((merged[i]["msg"]["time"] - m["time"]).total_seconds()) <= 3600
+                ),
+                None,
+            )
+        if at is None:
+            by_subject.setdefault(subject, []).append(len(merged))
             merged.append(it)
             continue
+        twin = merged[at]
         duplicates += 1
         keep, drop = (twin, it) if (twin["score"], -LABEL_ORDER.index(twin["label"])) >= (
             it["score"],
@@ -637,7 +647,7 @@ def sweep(messages: list[dict], me: Me, as_of: dt.datetime, since_hours: float, 
         keep["sources"] = sorted(set(keep["sources"]) | set(drop["sources"]))
         if not keep["msg"]["link"]:
             keep["msg"] = {**keep["msg"], "link": drop["msg"]["link"]}
-        merged[merged.index(twin)] = keep
+        merged[at] = keep
     merged.sort(key=lambda it: (-it["score"], it["msg"]["time"], it["msg"]["source"], it["msg"]["id"]))
     waiting.sort(key=lambda w: (w["msg"]["time"], w["msg"]["source"], w["msg"]["id"]))
     return {

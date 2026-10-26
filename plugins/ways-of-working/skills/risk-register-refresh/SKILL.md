@@ -1,6 +1,6 @@
 ---
 name: risk-register-refresh
-description: "Prepare the quarterly risk review from a register CSV, saved findings (Security Hub ASFF JSON, generic JSON or CSV) and last quarter's snapshot: new findings with no register entry, risks with no supporting finding, likelihood or impact changes, overdue reviews, risks without an owner, and a refresh agenda. Use when asked \"what changed in the risk register?\" or which findings are not in it. Not for user access reviews, scoring or rating risk (it uses the register's own values), triaging a live findings backlog, or GRC tool integration."
+description: "Prepare the quarterly risk review from a register CSV, saved findings (Security Hub ASFF JSON, generic JSON or CSV) and last quarter's snapshot: new findings with no register entry, risks with no supporting finding, risks whose rating moved since the snapshot, overdue reviews, risks without an owner, and a refresh agenda. Use when asked \"what changed in the risk register?\" or which findings are not in it. Not for user access reviews, scoring or rating a risk's likelihood and impact yourself (it uses the register's own values), triaging a live findings backlog, or GRC tool integration."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Findings exports are produced by the user with their own tools and read-only credentials.
 metadata:

@@ -4,15 +4,9 @@ Small, well-specified pieces of work for a first contribution. Each is self-cont
 
 To claim one, open an issue with the title below (or comment on the existing one) and say you are working on it. Run `python3 -m pytest -q`, `ruff check .` and `python3 scripts/validate_plugin.py` before opening the pull request.
 
-## 1. change-request-writer: flag replacement of stateful resource types
+## 1. change-request-writer: flag replacement of stateful resource types (done in 0.5.0)
 
-**Labels:** good first issue, change-request-writer, python
-
-**Context.** Replacing a database or a volume loses its data unless it is restored. The record lists every replace, but does not single out the stateful ones.
-
-**Acceptance criteria.**
-- A documented list of stateful types (for example `aws_db_instance`, `aws_rds_cluster`, `aws_ebs_volume`, `aws_efs_file_system`, `aws_dynamodb_table`) whose replace or destroy adds a "stateful" note to the Rollback section.
-- A test with a replaced `aws_db_instance` and a replaced `aws_instance`, where only the first gets the note.
+Done: destroyed or replaced types in `STATEFUL_TYPES` are marked stateful in the Rollback section, with a restore-point note.
 
 ## 2. meeting-actions-ledger: read a "Decisions:" section as decision candidates
 

@@ -1,6 +1,6 @@
 ---
 name: vendor-scorecard
-description: "Compare vendors, tools or suppliers on agreed weighted criteria from a CSV (criterion, weight, a 1 to 5 score column per vendor): weighted scores and ranking, whether the ranking survives each weight moved one step, ties for first, data problems, and a Markdown scorecard with a blank decision line. Use when asked to \"build a vendor scorecard\" or whether a shortlist depends on the weights. Not for choosing the criteria, pricing negotiation, or security questionnaires and vendor evidence (compliance-evidence-skills)."
+description: "Compare vendors, tools or suppliers on agreed weighted criteria from a CSV (criterion, weight, a 1 to 5 score column per vendor): weighted scores and ranking, which one wins, whether the winner changes when each weight moves one step, ties for first, data problems, and a Markdown scorecard with a blank decision line. Use when asked to \"build a vendor scorecard\" or whether a shortlist depends on the weights. Not for choosing the criteria, pricing negotiation, or security questionnaires and vendor evidence (compliance-evidence-skills)."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads a CSV you keep.
 metadata:

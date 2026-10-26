@@ -77,6 +77,9 @@ def read_rows(path: Path) -> tuple[list[str], list[tuple[int, list[str]]]]:
     if not text.strip():
         raise InputError(f"{path}: file is empty")
     if path.suffix.lower() == ".csv":
+        if "\x00" in text:  # Python 3.10's csv module stops on a NUL; 3.11 reads it. Same answer on both.
+            line = text[: text.index("\x00")].count("\n") + 1
+            raise InputError(f"{path}: line {line} holds a NUL character; save it as plain-text CSV")
         reader = csv.reader(io.StringIO(text))
         rows = [(reader.line_num, r) for r in reader]
         rows = [(n, r) for n, r in rows if any(c.strip() for c in r)]

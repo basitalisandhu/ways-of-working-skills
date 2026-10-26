@@ -52,8 +52,8 @@ def norm(text: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", " ", text.lower())).strip()
 
 
-def day_of(stamp: str | None) -> date | None:
-    if not stamp:
+def day_of(stamp: object) -> date | None:
+    if not isinstance(stamp, str) or not stamp:
         return None
     try:
         return date.fromisoformat(stamp[:10])
@@ -105,33 +105,44 @@ def read_commits(spec: str, warnings: list[str]) -> tuple[str, list[dict]]:
     return repo, commits
 
 
+def text(raw: dict, key: str) -> str:
+    """A string field of an export entry; any other JSON type (number, list, object, null) reads as empty."""
+    value = raw.get(key)
+    return value if isinstance(value, str) else ""
+
+
 def to_item(raw: dict, kind: str, source: str, warnings: list[str], index: int) -> dict | None:
-    if not isinstance(raw, dict) or not isinstance(raw.get("number"), int):
+    number = raw.get("number") if isinstance(raw, dict) else None
+    if not isinstance(number, int) or isinstance(number, bool):
         warnings.append(f"{source}: entry {index} has no number; skipped")
         return None
-    url = raw.get("url") or ""
+    url = text(raw, "url")
     m = URL_RE.search(url)
     repo = m.group(2) if m else "?"
     if not m:
         warnings.append(f"{source}: {kind} #{raw['number']} has no GitHub url, so its repository is unknown")
-    labels = [lab.get("name", "") for lab in raw.get("labels") or [] if isinstance(lab, dict)]
-    people = [raw.get("author") or {}] if kind == "pr" else raw.get("assignees") or []
+    raw_labels = raw.get("labels")
+    labels = [lab["name"] for lab in raw_labels if isinstance(lab, dict) and isinstance(lab.get("name"), str)] \
+        if isinstance(raw_labels, list) else []
+    people = [raw.get("author")] if kind == "pr" else raw.get("assignees")
+    if not isinstance(people, list):
+        people = []
     return {
         "kind": kind,
         "repo": repo,
         "number": raw["number"],
         "key": f"{repo.lower()}#{raw['number']}",
         "ref": f"{repo}#{raw['number']}",
-        "title": (raw.get("title") or "").strip(),
+        "title": text(raw, "title").strip(),
         "url": url,
-        "state": (raw.get("state") or "").upper(),
-        "state_reason": (raw.get("stateReason") or "").upper(),
+        "state": text(raw, "state").upper(),
+        "state_reason": text(raw, "stateReason").upper(),
         "draft": bool(raw.get("isDraft")),
         "merged": day_of(raw.get("mergedAt")),
         "closed": day_of(raw.get("closedAt")),
         "updated": day_of(raw.get("updatedAt")),
         "labels": labels,
-        "logins": [p.get("login", "") for p in people if isinstance(p, dict)],
+        "logins": [p["login"] for p in people if isinstance(p, dict) and isinstance(p.get("login"), str)],
     }
 
 

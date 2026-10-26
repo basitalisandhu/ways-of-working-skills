@@ -72,6 +72,9 @@ def read_text(path: Path) -> str:
 
 def read_csv(path: Path, warnings: list[str]) -> tuple[list[str], list[dict]]:
     text = read_text(path)
+    if "\x00" in text:  # Python 3.10's csv module stops on a NUL; 3.11 reads it. Same answer on both.
+        line = text[: text.index("\x00")].count("\n") + 1
+        raise InputError(f"{path}: line {line} holds a NUL character; save it as plain-text CSV")
     reader = csv.reader(io.StringIO(text))
     try:
         header = next(reader)

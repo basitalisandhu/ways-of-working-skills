@@ -1,0 +1,5 @@
+id,system,control,reason,approver,granted,expires,compensating controls,requester,renewal_of
+EX-1,legacy-ftp,A.8.20,vendor upload,Head of IT,2026-01-01,2026-07-01,source IP allow list,Ops lead,
+EX-2,legacy-ftp,A.8.20,vendor upload,Head of IT,2026-07-01,2026-10-20,source IP allow list,Ops lead,EX-1
+EX-3,build-server,A.8.8,patch window clash,Ops lead,2026-08-01,2026-09-30,,Ops lead,
+EX-4,hr-portal,A.5.15,shared admin account,CISO,2026-09-01,2027-03-01,session recording,HR lead,

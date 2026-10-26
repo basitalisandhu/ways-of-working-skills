@@ -71,6 +71,9 @@ def read_rows(path: Path) -> tuple[list[str], list[tuple[int, list[str]]]]:
     text = path.read_text(encoding="utf-8-sig", errors="replace")
     if not text.strip():
         raise InputError(f"{path}: file is empty")
+    if "\x00" in text:  # Python 3.10's csv module stops on a NUL; 3.11 reads it. Same answer on both.
+        line = text[: text.index("\x00")].count("\n") + 1
+        raise InputError(f"{path}: line {line} holds a NUL character; save it as plain-text CSV")
     reader = csv.reader(io.StringIO(text))
     rows = [(reader.line_num, [c.strip() for c in r]) for r in reader]
     rows = [(n, r) for n, r in rows if any(r)]
@@ -175,6 +178,10 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], step: Fraction
             }
         )
     moves = []
+    # One weight moved by delta changes each vendor's points by delta x its score on that criterion, and the total
+    # weight by delta, so each move costs one pass over the vendors, not a full recompute over every criterion.
+    base_points = {v: sum(c["weight"] * c["scores"][v] for c in criteria) for v in vendors}
+    base_total = sum(base_weights.values())
     for c in criteria:
         for sign, label in ((1, "+"), (-1, "-")):
             new_weight = c["weight"] + sign * step
@@ -183,12 +190,13 @@ def analyse(header: list[str], rows: list[tuple[int, list[str]]], step: Fraction
                 "move": f"{label}{fmt_weight(step)}",
                 "weight": fmt_weight(new_weight) if new_weight >= 0 else None,
             }
-            weights = dict(base_weights, **{c["criterion"]: new_weight})
-            if new_weight < 0 or not sum(weights.values()):
+            delta = new_weight - c["weight"]
+            new_total = base_total + delta
+            if new_weight < 0 or not new_total:
                 entry.update(tested=False, leader_kept=None, order_kept=None, leader=[], order=[])
                 moves.append(entry)
                 continue
-            rank = ranking(totals(criteria, vendors, weights))
+            rank = ranking({v: (base_points[v] + delta * c["scores"][v]) / new_total for v in vendors})
             entry.update(
                 tested=True,
                 leader_kept=rank[0] == base_rank[0],

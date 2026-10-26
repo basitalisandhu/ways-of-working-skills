@@ -1,6 +1,6 @@
 ---
 name: meeting-actions-ledger
-description: "Track the action items agreed across a folder of Markdown or text meeting notes in one ledger: each action with owner and due date, the same action carried between meetings merged into one, overdue, unowned and thrice-carried items flagged, every item cited to file and line, written to ledger.md and ledger.json. Use when asked \"which actions are overdue?\" or for the open list for the next meeting. Not for calendar access, sending reminders, transcribing audio, or judging how people follow up."
+description: "Track the action items agreed across project meetings in one ledger, from a folder of Markdown or text notes: each action with its owner and due date, the same action carried over from meeting to meeting merged into one, overdue, unowned and thrice-carried items flagged, every item cited to file and line, written to ledger.md and ledger.json. Use when asked \"which meeting actions are overdue?\", who owns what, or for the open action list for the next meeting or sync. Not for calendar access, sending reminder emails, transcribing audio, or judging how people follow up."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads a folder of notes you saved.
 metadata:

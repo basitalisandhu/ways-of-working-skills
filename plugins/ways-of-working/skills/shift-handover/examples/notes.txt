@@ -1,0 +1,1 @@
+Queue backlog is draining slowly; check the consumer lag at 10:00.

@@ -1,0 +1,55 @@
+[
+ {
+  "number": 12,
+  "title": "Add retry to checkout",
+  "url": "https://github.com/OWNER/shop/pull/12",
+  "state": "MERGED",
+  "isDraft": false,
+  "mergedAt": "2026-09-30T10:00:00Z",
+  "updatedAt": "2026-09-30T10:00:00Z",
+  "labels": [],
+  "author": {
+   "login": "example-dev"
+  }
+ },
+ {
+  "number": 15,
+  "title": "Rate limit the export API",
+  "url": "https://github.com/OWNER/shop/pull/15",
+  "state": "OPEN",
+  "isDraft": false,
+  "updatedAt": "2026-09-28T10:00:00Z",
+  "labels": [],
+  "author": {
+   "login": "example-dev"
+  }
+ },
+ {
+  "number": 16,
+  "title": "Move sessions to Redis",
+  "url": "https://github.com/OWNER/shop/pull/16",
+  "state": "OPEN",
+  "isDraft": true,
+  "updatedAt": "2026-09-29T10:00:00Z",
+  "labels": [],
+  "author": {
+   "login": "example-dev"
+  }
+ },
+ {
+  "number": 17,
+  "title": "Upgrade the payment SDK",
+  "url": "https://github.com/OWNER/shop/pull/17",
+  "state": "OPEN",
+  "isDraft": false,
+  "updatedAt": "2026-09-27T10:00:00Z",
+  "labels": [
+   {
+    "name": "blocked"
+   }
+  ],
+  "author": {
+   "login": "example-dev"
+  }
+ }
+]

@@ -18,6 +18,8 @@ change-record.md
 agenda.md
 rfc-lint.md
 /ledger/
+# ...except the synthetic inputs each skill ships for its README sample
+!plugins/ways-of-working/skills/*/examples/**
 
 # Editors and OS
 .DS_Store
