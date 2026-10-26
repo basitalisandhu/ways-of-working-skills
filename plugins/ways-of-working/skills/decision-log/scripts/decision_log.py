@@ -114,6 +114,55 @@ def read(folder: Path) -> list[dict]:
     return records
 
 
+def walk_back_to_start(r: dict, resolve) -> list[str] | None:
+    """Follow superseded-by from r; the ids walked if the chain comes back to r's id, else None."""
+    seen, seen_set, cur = [r["id"]], {r["id"]}, r
+    while cur["superseded_by"]:
+        nxt = resolve(cur["superseded_by"][0])
+        if nxt is None:
+            return None
+        if nxt["id"] == r["id"]:
+            return seen
+        if nxt["id"] in seen_set:
+            return None
+        seen.append(nxt["id"])
+        seen_set.add(nxt["id"])
+        cur = nxt
+    return None
+
+
+def supersede_cycles(records: list[dict], resolve) -> list[tuple[dict, list[str]]]:
+    """(record, chain of ids from it) for every record whose superseded-by chain returns to it.
+
+    Each record has at most one next record (the first superseded-by), so the links form chains that end or run into
+    a loop. One pass marks each record once and every loop is found when the walk meets its own path, which keeps a
+    long chain linear instead of walking it again from every record. With duplicate ids, where an id no longer names
+    one record, each record is walked on its own as before.
+    """
+    if len({r["id"] for r in records}) < len(records):
+        return [(r, chain) for r in records if (chain := walk_back_to_start(r, resolve)) is not None]
+
+    def nxt(rec: dict) -> dict | None:
+        return resolve(rec["superseded_by"][0]) if rec["superseded_by"] else None
+
+    done: set[int] = set()
+    loop_of: dict[int, list[dict]] = {}
+    for start in records:
+        path: list[dict] = []
+        where: dict[int, int] = {}
+        cur = start
+        while cur is not None and id(cur) not in done and id(cur) not in where:
+            where[id(cur)] = len(path)
+            path.append(cur)
+            cur = nxt(cur)
+        if cur is not None and id(cur) in where:
+            loop = path[where[id(cur)]:]
+            for k, rec in enumerate(loop):
+                loop_of[id(rec)] = loop[k:] + loop[:k]
+        done.update(id(rec) for rec in path)
+    return [(r, [rec["id"] for rec in loop_of[id(r)]]) for r in records if id(r) in loop_of]
+
+
 def analyse(records: list[dict], as_of: dt.date) -> dict:
     findings: list[dict] = []
 
@@ -189,18 +238,8 @@ def analyse(records: list[dict], as_of: dt.date) -> dict:
             t = resolve(target)
             if t and r["id"] not in t["supersedes"] and r["stem"] not in t["supersedes"]:
                 add("one-way-link", r, f"superseded-by {t['id']} but {t['id']} does not name it in supersedes")
-        seen, cur = [r["id"]], r
-        while cur["superseded_by"]:
-            nxt = resolve(cur["superseded_by"][0])
-            if nxt is None:
-                break
-            if nxt["id"] == r["id"]:
-                add("supersede-cycle", r, "superseded-by chain returns to it: " + " -> ".join(seen + [r["id"]]))
-                break
-            if nxt["id"] in seen:
-                break
-            seen.append(nxt["id"])
-            cur = nxt
+    for r, chain in supersede_cycles(records, resolve):
+        add("supersede-cycle", r, "superseded-by chain returns to it: " + " -> ".join(chain + [r["id"]]))
 
     rows.sort(key=lambda x: (x["id"], x["file"]))
     findings.sort(key=lambda f: (f["id"], f["file"], f["rule"], f["detail"]))

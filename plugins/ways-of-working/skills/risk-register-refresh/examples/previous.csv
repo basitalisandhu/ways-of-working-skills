@@ -1,0 +1,3 @@
+id,title,owner,likelihood,impact,treatment,review_date,status
+R-01,Public storage buckets,Platform lead,Low,High,Mitigate,2026-09-01,Open
+R-02,Root account use,Security lead,Low,High,Mitigate,2026-09-01,Open

@@ -4,6 +4,30 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-26
+
+### Added
+
+- `change-request-writer`: a destroyed or replaced resource whose type holds data (databases, volumes, file systems, tables, buckets, caches, queues, streams, secrets and keys on AWS, Azure and Google Cloud; the list is in SKILL.md) is marked "stateful" in the Rollback section, with a note to confirm a restore point before apply. The JSON output carries `stateful` per resource and a `stateful_lost` list. Information only: the exit code does not change. Closes #1.
+- A `README.md` in every skill folder with one command to run on the synthetic files in the skill's new `examples/` folder and the real output of that command. `scripts/skill_readmes.py` writes them, and `tests/test_skill_readmes.py` reruns every command and fails when a README has drifted.
+- `tests/test_fuzz_inputs.py`: seeded fuzz tests that mutate every script's input files (random bytes, truncation, inserted delimiters, JSON values of the wrong type, shuffled or dropped lines) and require exit 0, 1 or 2 with no traceback.
+- `tests/test_integration_chain.py`: one end-to-end run through the `ways-of-working` dispatcher, from a Terraform plan to the change record, the CAB actions ledger, the decision record and two weeks of status notes.
+- `tests/test_scaling.py`: equivalence and timing checks for the four speed fixes below.
+
+### Fixed
+
+- `weekly-status-rollup`: a PR or issue export with a field of the wrong JSON type (a number for a title, a string for labels, `true` for assignees, a number for a date) stopped with a traceback; such fields now read as empty.
+- `change-request-writer`: a plan whose `change.actions` held a nested list stopped with a traceback; it now exits 2 with the resource it could not read.
+- `next-actions-sweep`: a Teams message whose `body.content` was not text, or whose `mentions` was not a list, stopped with a traceback; both now read as empty.
+- `working-agreement-check` was slow on a large CODEOWNERS file because every pattern was recompiled for every path checked: 1,000 rules took 6 seconds and 10,000 took 580 seconds; now 0.06 and 0.12 seconds.
+- `vendor-scorecard` recomputed every weighted score for each sensitivity move: 1,000 criteria by 10 vendors took 16.6 seconds, now 0.11 seconds, with the same results.
+- `decision-log` walked the supersede chain again from every decision: 1,000 files in one long chain took 1.1 seconds and grew with the square of the chain; now 0.09 seconds.
+- `next-actions-sweep` compared each message with every kept message when merging duplicates across accounts: 10,000 messages took 1.8 seconds, now 0.2 seconds.
+
+### Changed
+
+- All thirteen skill descriptions reworded after scoring them with the skill-trigger-eval lexical proxy against 130 labelled prompts (5 should-trigger and 5 should-not-trigger per skill, other skills' prompts counted as negatives): pooled recall rose from 0.65 to 0.92 and precision from 0.91 to 1.00, every skill now at 0.80 recall or above with no false triggers.
+
 ## [0.4.0] - 2026-10-18
 
 ### Changed

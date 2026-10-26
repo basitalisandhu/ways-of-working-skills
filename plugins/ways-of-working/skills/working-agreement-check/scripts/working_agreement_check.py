@@ -50,6 +50,7 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import functools
 import json
 import re
 import sys
@@ -187,7 +188,10 @@ def parse_codeowners(text: str) -> list[tuple[int, str, list[str]]]:
     return rules
 
 
+@functools.cache
 def codeowners_regex(pattern: str) -> re.Pattern:
+    """The pattern as a compiled regex, compiled once per pattern: re's own cache holds 512 patterns, so a large
+    CODEOWNERS file was recompiled line by line for every path checked."""
     anchored = pattern.startswith("/") or "/" in pattern.rstrip("/")
     body = pattern.strip("/")
     out = ""
@@ -216,11 +220,11 @@ def codeowners_regex(pattern: str) -> re.Pattern:
 
 
 def owner_of(rules: list[tuple[int, str, list[str]]], path: str) -> tuple[int, str, list[str]] | None:
-    match = None
-    for rule in rules:
+    """The last rule whose pattern matches path (in CODEOWNERS the last match wins), or None."""
+    for rule in reversed(rules):
         if codeowners_regex(rule[1]).match(path):
-            match = rule
-    return match
+            return rule
+    return None
 
 
 def parse_workflows(text: str) -> list[dict]:

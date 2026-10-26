@@ -1,0 +1,4 @@
+# example owners
+*          @example/platform
+/src/      @example/app
+/infra/

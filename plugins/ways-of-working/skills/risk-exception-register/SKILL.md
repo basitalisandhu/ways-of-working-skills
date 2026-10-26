@@ -1,6 +1,6 @@
 ---
 name: risk-exception-register
-description: "Review a register of time-bound security exceptions and risk acceptances (CSV or Markdown table): flags expired exceptions and those expiring within 30 days, missing approvers or compensating controls, approvers who are also the requester, and repeated renewals, then prints a review agenda with a blank decision line per item. Use when asked to \"review the exception register\", which waivers have expired, or to check the register before an audit. Not for user access reviews, deciding whether a risk is acceptable, scoring risk, or Vanta and other GRC tool integration."
+description: "Review a register of time-bound security exceptions, waivers and risk acceptances (CSV or Markdown table): flags expired exceptions and those that expire in the next 30 days, missing approvers or compensating controls, approvers who signed off their own request, and repeated renewals, then prints a review agenda with a blank decision line per item. Use when asked to \"review the exception register\", which waivers have expired, or to check the register before an audit. Not for user access reviews, deciding whether a risk is acceptable, scoring risk, or Vanta and other GRC tool integration."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads a register file you keep.
 metadata:

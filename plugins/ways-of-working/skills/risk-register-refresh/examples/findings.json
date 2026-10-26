@@ -1,0 +1,36 @@
+{
+ "Findings": [
+  {
+   "SchemaVersion": "2018-10-08",
+   "Id": "example-finding-1",
+   "Title": "S3 general purpose buckets should block public access",
+   "Compliance": {
+    "SecurityControlId": "S3.8",
+    "Status": "FAILED"
+   },
+   "Severity": {
+    "Label": "HIGH"
+   },
+   "Workflow": {
+    "Status": "NEW"
+   },
+   "RecordState": "ACTIVE"
+  },
+  {
+   "SchemaVersion": "2018-10-08",
+   "Id": "example-finding-2",
+   "Title": "EC2 instances should use IMDSv2",
+   "Compliance": {
+    "SecurityControlId": "EC2.8",
+    "Status": "FAILED"
+   },
+   "Severity": {
+    "Label": "HIGH"
+   },
+   "Workflow": {
+    "Status": "NEW"
+   },
+   "RecordState": "ACTIVE"
+  }
+ ]
+}

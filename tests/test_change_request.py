@@ -194,7 +194,9 @@ configuration).
 These resources are destroyed or replaced; re-applying the old configuration creates new ones, so any data or \
 identifiers they hold must be restored separately:
 
-- `aws_db_instance.main` (replace)
+- `aws_db_instance.main` (replace, stateful)
+
+STATEFUL_NOTE
 
 ## Verification
 
@@ -213,7 +215,12 @@ identifiers they hold must be restored separately:
 ## Maintenance window
 
 2026-10-12 22:00 to 23:00 UTC
-"""
+""".replace(
+    "STATEFUL_NOTE",
+    "**Stateful (1):** the items marked stateful hold data (a database, volume, file system, table, bucket, cache, "
+    "queue, stream, secret or key), and the new resource starts without it. Confirm a restore point (snapshot, backup "
+    "or export) for each before apply, and how long a restore takes, before choosing the window.",
+)
 
 
 def test_golden_markdown_record(tmp_path):
@@ -230,3 +237,44 @@ def test_golden_markdown_record(tmp_path):
     )
     assert rc == 1
     assert out == GOLDEN
+
+
+def test_only_stateful_replacements_get_the_stateful_note(tmp_path):
+    p = plan(tmp_path, [rc_("aws_db_instance.main", "aws_db_instance", ["delete", "create"]),
+                        rc_("aws_instance.web", "aws_instance", ["delete", "create"])])
+    rc, rep = run_json(mod, [str(p)])
+    assert rc == 0  # information only: neither type needs a reviewer
+    assert rep["stateful_lost"] == ["aws_db_instance.main"]
+    assert {r["address"]: r["stateful"] for r in rep["resources"]} == {"aws_db_instance.main": True,
+                                                                        "aws_instance.web": False}
+    _, out, _ = run_main(mod, [str(p)])
+    rollback = out.split("## Rollback")[1].split("## Verification")[0]
+    assert "- `aws_db_instance.main` (replace, stateful)" in rollback
+    assert "- `aws_instance.web` (replace)\n" in rollback
+    assert "**Stateful (1):**" in rollback
+
+
+def test_destroyed_stateful_types_across_clouds_and_no_note_for_adds(tmp_path):
+    p = plan(tmp_path, [rc_("aws_ebs_volume.data", "aws_ebs_volume", ["delete"]),
+                        rc_("google_sql_database_instance.db", "google_sql_database_instance", ["delete"]),
+                        rc_("azurerm_storage_account.logs", "azurerm_storage_account", ["create"])])
+    _, rep = run_json(mod, [str(p)])
+    assert rep["stateful_lost"] == ["aws_ebs_volume.data", "google_sql_database_instance.db"]
+    _, out, _ = run_main(mod, [str(p)])
+    assert "**Stateful (2):**" in out
+
+
+def test_plan_without_stateful_changes_has_no_note(tmp_path):
+    p = plan(tmp_path, [rc_("aws_instance.web", "aws_instance", ["delete"])])
+    _, out, _ = run_main(mod, [str(p)])
+    assert "Stateful" not in out
+
+
+def test_skill_md_lists_exactly_the_stateful_types():
+    import re
+
+    from conftest import SKILLS
+
+    text = (SKILLS / "change-request-writer" / "SKILL.md").read_text(encoding="utf-8")
+    table = text.split("| Cloud | Resource types |")[1].split("\n\n")[0]
+    assert set(re.findall(r"`([a-z0-9_]+)`", table)) == set(mod.STATEFUL_TYPES)

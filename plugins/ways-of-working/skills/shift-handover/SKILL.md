@@ -1,6 +1,6 @@
 ---
 name: shift-handover
-description: "Write an on-call or shift handover note from saved incident and alert exports (JSON or CSV) and the outgoing shift's notes: open incidents by age, incidents with no recent update or no owner, noisy alerts and silences that expire next shift, framed as what is open, what to watch and what is silenced until when. Use when asked to \"write the on-call handover\" or to check what is stale before handing over. Not for postmortems or incident timelines (incident-postmortem-timeline), paging people, or silencing alerts."
+description: "Write an on-call or shift handover note from saved incident and alert exports (JSON or CSV) and the outgoing shift's notes: open incidents by age, incidents with no recent update or no owner, noisy alerts and silences or mutes that expire next shift, framed as what is open, what to watch and what is silenced until when, for the incoming on-call. Use when asked to \"write the on-call handover\" or to check what is stale before handing over. Not for postmortems or incident timelines (incident-postmortem-timeline), paging people, or silencing alerts."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. Reads incident and alert exports you saved.
 metadata:

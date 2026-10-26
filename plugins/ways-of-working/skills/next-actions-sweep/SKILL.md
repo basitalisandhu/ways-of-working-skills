@@ -1,6 +1,6 @@
 ---
 name: next-actions-sweep
-description: "Turn saved exports of several mailboxes and chats (Microsoft Graph mail and Teams JSON, Slack export, CSV; work and personal accounts together) into one ranked do-next list labelled reply, decide, do or FYI, with the reason, any stated deadline, the source link, duplicates across accounts merged, and a waiting-on-others list. Use when asked \"what should I answer first?\" or to triage several inboxes at once. Not for sending, drafting or filing mail, live connector access, or meeting actions (meeting-actions-ledger)."
+description: "Turn saved exports of emails and chats from several inboxes (Microsoft Graph mail and Teams JSON, Slack export, CSV; work and personal accounts together) into one ranked do-next list: each message labelled reply, decide, do or FYI with the reason, any stated deadline and the source link, duplicates across accounts merged, and what is waiting on you versus waiting on others. Use when asked \"what should I answer first?\" or to triage several inboxes at once and tell what to do next. Not for sending, drafting or filing mail, live connector access, or meeting actions (meeting-actions-ledger)."
 license: MIT
 compatibility: Python 3.10 or newer on PATH as python3. Standard library only, no network. The user exports the mail and chat files with read-only access first.
 metadata:
