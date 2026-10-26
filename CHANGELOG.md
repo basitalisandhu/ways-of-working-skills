@@ -18,6 +18,7 @@ All notable changes to this project are documented here. The format follows Keep
 
 - `weekly-status-rollup`: a PR or issue export with a field of the wrong JSON type (a number for a title, a string for labels, `true` for assignees, a number for a date) stopped with a traceback; such fields now read as empty.
 - `change-request-writer`: a plan whose `change.actions` held a nested list stopped with a traceback; it now exits 2 with the resource it could not read.
+- On Python 3.10, a CSV holding a NUL character stopped `risk-exception-register`, `risk-register-refresh`, `shift-handover`, `vendor-scorecard` and `next-actions-sweep` with a traceback (3.11 and later read it). All five now exit 2 on every Python version, naming the line.
 - `next-actions-sweep`: a Teams message whose `body.content` was not text, or whose `mentions` was not a list, stopped with a traceback; both now read as empty.
 - `working-agreement-check` was slow on a large CODEOWNERS file because every pattern was recompiled for every path checked: 1,000 rules took 6 seconds and 10,000 took 580 seconds; now 0.06 and 0.12 seconds.
 - `vendor-scorecard` recomputed every weighted score for each sensitivity move: 1,000 criteria by 10 vendors took 16.6 seconds, now 0.11 seconds, with the same results.

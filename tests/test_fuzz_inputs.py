@@ -196,3 +196,18 @@ def test_next_actions_reads_a_teams_message_with_odd_body_and_mentions(tmp_path)
                           ["--source", f"teams={tmp_path / 'teams.json'}", "--me", "u-alex",
                            "--as-of", "2026-10-16T09:00:00Z"])
     assert rc in (0, 1) and "Traceback" not in err
+
+
+@pytest.mark.parametrize(("skill", "script", "argv"), [
+    ("risk-exception-register", "exception_register.py", ["{f}", "--as-of", "2026-10-05"]),
+    ("shift-handover", "shift_handover.py", ["{f}", "--as-of", "2026-10-05T08:00:00Z"]),
+    ("vendor-scorecard", "vendor_scorecard.py", ["{f}"]),
+    ("risk-register-refresh", "risk_register_refresh.py", ["{f}", "--as-of", "2026-10-05"]),
+    ("next-actions-sweep", "next_actions.py", ["--source", "x={f}:csv", "--me", "me@example.com",
+                                               "--as-of", "2026-10-16T09:00:00Z"]),
+])
+def test_a_csv_with_a_nul_character_exits_2_on_every_python(skill, script, argv, tmp_path):
+    f = tmp_path / "in.csv"
+    f.write_bytes(b"id,title\nA-1,te\x00xt\n")
+    rc, _, err = run_main(load_script(skill, script), [a.replace("{f}", str(f)) for a in argv])
+    assert rc == 2 and "line 2 holds a NUL character" in err

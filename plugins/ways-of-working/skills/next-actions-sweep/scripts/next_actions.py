@@ -345,6 +345,9 @@ def read_slack(records: list, source: str, dm: bool) -> tuple[list[dict], list[s
 
 
 def read_csv(text: str, source: str) -> tuple[list[dict], list[str]]:
+    if "\x00" in text:  # Python 3.10's csv module stops on a NUL; 3.11 reads it. Same answer on both.
+        line = text[: text.index("\x00")].count("\n") + 1
+        raise InputError(f"{source}: line {line} holds a NUL character; save it as plain-text CSV")
     rows = list(csv.reader(io.StringIO(text)))
     rows = [r for r in rows if any(c.strip() for c in r)]
     if not rows:

@@ -118,6 +118,9 @@ def read_records(path: Path, label: str, list_keys: tuple[str, ...]) -> tuple[li
             if isinstance(item, dict):
                 records.append((f"item {i}", {key(k): "" if v is None else str(v).strip() for k, v in item.items()}))
         return records, [], []
+    if "\x00" in text:  # Python 3.10's csv module stops on a NUL; 3.11 reads it. Same answer on both.
+        line = text[: text.index("\x00")].count("\n") + 1
+        raise InputError(f"{label} {path}: line {line} holds a NUL character; save it as plain-text CSV")
     reader = csv.reader(io.StringIO(text))
     rows = [(reader.line_num, r) for r in reader if any(c.strip() for c in r)]
     if not rows:
